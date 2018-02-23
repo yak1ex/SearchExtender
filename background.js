@@ -81,14 +81,28 @@ function setupMenu ()
       confIdxFromName[conf[i][IDX_NAME]] = i
       confIdxFromKey[conf[i][IDX_KEY]] = i
     }
+    chrome.contextMenus.create({
+      title: '設定',
+      id: '設定',
+      contexts: ["page", "selection", "link", "image"],
+      parentId: "root"
+    })
   })
 }
 
 // TODO: open in current tab, next tab
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   console.log(info)
-  const url = makeURL(conf[confIdxFromName[info.menuItemId]][IDX_URL], info.selectionText, info.linkUrl || info.srcUrl || info.pageUrl)
-  chrome.tabs.create({ url })
+  if (info.menuItemId === '設定') {
+    if (chrome.runtime.openOptionsPage) {
+      chrome.runtime.openOptionsPage();
+    } else {
+      window.open(chrome.runtime.getURL('options.html'));
+    }
+  } else {
+    const url = makeURL(conf[confIdxFromName[info.menuItemId]][IDX_URL], info.selectionText, info.linkUrl || info.srcUrl || info.pageUrl)
+    chrome.tabs.create({ url })
+  }
 })
 
 chrome.storage.onChanged.addListener((changes, area) => {
