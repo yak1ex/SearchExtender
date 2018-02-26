@@ -1,10 +1,53 @@
 <!DOCTYPE html>
 <html>
+<head>
+<style>
+#status {
+  height: 1.5em;
+}
+dialog h3 {
+  margin: 0;
+}
+label[for="query"] {
+  vertical-align: top;
+}
+#confirmMessage {
+  margin-bottom: 1em;
+}
+</style>
+</head>
 <body>
-<input type="button" id="add" value="Add...">
+<input type="button" id="new" value="New...">
 <table id="table">
 <tr><th>Edit</th><th>Name</th><th>OMNI</th><th>PAGE</th><th>SEL</th><th>LINK</th><th>IMG</th><th>Key</th><th>Query</th><th>Del</th></tr>
 </table>
+<div id="status"></div>
+<input type="button" id="save" value="Save">
+<dialog id="detail">
+<h3 id="heading"></h3>
+<hr>
+<form method="dialog">
+<label for="name">name</label><input type="text" name="name" id="name"><br/>
+<label for="omnibox">omnibox</label><input type="checkbox" name="omnibox" id="omnibox">
+<label for="page">page</label><input type="checkbox" name="page" id="page">
+<label for="selection">selection</label><input type="checkbox" name="selection" id="selection">
+<label for="link">link</label><input type="checkbox" name="link" id="link">
+<label for="image">image</label><input type="checkbox" name="image" id="image"><br/>
+<label for="key">key</label><input type="text" name="key" id="key"><br/>
+<label for="query">query</label><textarea name="query" id="query"></textarea><br/>
+<input type="submit" id="update" value="">
+<input type="reset" id="cancel" value="Cancel">
+</form>
+</dialog>
+<dialog id="confirm">
+<h3>Confirmation</h3>
+<hr>
+<div id="confirmMessage"></div>
+<form method="dialog">
+<input type="submit" id="confirmConfirm" value="Confirm">
+<input type="reset" id="cancelConfirm" value="Cancel">
+</form>
+</dialog>
 <script src="options.js"></script>
 </body>
 </html>
