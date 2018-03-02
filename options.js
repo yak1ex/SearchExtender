@@ -6,6 +6,10 @@
 
   let options
 
+  const targetKeyVal = [['omnibox', 1], ['page', 2], ['selection', 4], ['link', 8], ['image', 16]]
+  const targetKey = targetKeyVal.map(x => x[0])
+  const targetVal = targetKeyVal.map(x => x[1])
+
   let myConfirm = (message, cb) => {
     document.getElementById('confirmMessage').textContent = message
     let cbTrue, cbFalse
@@ -43,7 +47,7 @@
     document.getElementById('heading').textContent = 'New search config'
     document.getElementById('name').value = ''
     document.getElementById('omnibox').checked = false
-    ;['omnibox', 'page', 'selection', 'link', 'image'].forEach(id => { document.getElementById(id).checked = false })
+    targetKey.forEach(id => { document.getElementById(id).checked = false })
     document.getElementById('key').value = ''
     document.getElementById('query').value = ''
   }
@@ -52,7 +56,7 @@
     document.getElementById('update').value = 'Update'
     document.getElementById('heading').textContent = 'Edit search config'
     document.getElementById('name').value = v[0]
-    ;[['omnibox', 1], ['page', 2], ['selection', 4], ['link', 8], ['image', 16]].forEach(vv => { document.getElementById(vv[0]).checked = ((v[1] & vv[1]) !== 0) })
+    targetKeyVal.forEach(vv => { document.getElementById(vv[0]).checked = ((v[1] & vv[1]) !== 0) })
     document.getElementById('key').value = v[2]
     document.getElementById('query').value = v[3]
   }
@@ -60,7 +64,7 @@
   let fromDetail = () => {
     return [
       document.getElementById('name').value,
-      [['omnibox', 1], ['page', 2], ['selection', 4], ['link', 8], ['image', 16]].reduce((acc, vv) => acc + (document.getElementById(vv[0]).checked ? vv[1] : 0), 0),
+      targetKeyVal.reduce((acc, vv) => acc + (document.getElementById(vv[0]).checked ? vv[1] : 0), 0),
       document.getElementById('key').value,
       document.getElementById('query').value,
       false // FIXME
@@ -84,7 +88,7 @@
       })
     })
     tr.appendChild(document.createElement('td')).innerText = v[0]
-    for (let j of [1, 2, 4, 8, 16]) {
+    for (let j of targetVal) {
       let cb = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
       cb.setAttribute('type', 'checkbox')
       if (v[1] & j) cb.checked = true
@@ -117,6 +121,18 @@
     })
   }
 
+  let makeExports = (searches) => {
+    let result = []
+    for (let v of searches) {
+      let target = {}
+      for (let kv of targetKeyVal) {
+        if (v[1] & kv[1]) target[kv[0]] = true
+      }
+      result.push([v[0], target, v[2], v[3]])
+    }
+    return JSON.stringify(result, null, 2)
+  }
+
   let restoreOptions = () => {
     chrome.storage.sync.get('searches', function (res) {
       options = res
@@ -125,6 +141,7 @@
         let v = options.searches[i]
         document.getElementById('table').appendChild(createRow(v))
       }
+      document.getElementById('export').href = 'data:text/json;charset=utf-8,' + encodeURIComponent(makeExports(options.searches))
     })
   }
 
