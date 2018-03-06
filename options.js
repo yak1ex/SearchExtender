@@ -10,6 +10,12 @@
   const targetKey = targetKeyVal.map(x => x[0])
   const targetVal = targetKeyVal.map(x => x[1])
 
+  let myAlert = (title, message) => {
+    document.getElementById('alertTitle').textContent = title
+    document.getElementById('alertMessage').textContent = message
+    document.getElementById('alert').showModal()
+  }
+
   let myConfirm = (message, cb) => {
     document.getElementById('confirmMessage').textContent = message
     let cbTrue, cbFalse
@@ -133,6 +139,28 @@
     return JSON.stringify(result, null, 2)
   }
 
+  let fromExports = (searches) => {
+    let results = []
+    if (searches === null) return new Error('Invalid JSON')
+    if (!(searches instanceof Array)) return new Error('root is not an array')
+    try {
+      searches.forEach((v, idx) => {
+        if (!(v instanceof Array) || v.length !== 4) throw new Error(`The ${idx+1}-th entry is not a 4-element array`)
+        if (typeof v[1] !== 'object') throw new Error(`The 2nd element of ${idx+1}-th entry is not an object`)
+        const unknown = Object.keys(v[1]).filter(x => targetKey.indexOf(x) === -1)
+        if (unknown.length !== 0) throw new Error(`unknown key ${unknown.join(', ')} is used in ${idx+1}-th entry`)
+        let bits = 0
+        for (let kv of targetKeyVal) {
+          if (kv[0] in v[1]) bits += kv[1]
+        }
+        results.push([v[0], bits, v[2], v[3]])
+      })
+    } catch(e) {
+      return e
+    }
+    return results
+  }
+
   let restoreOptions = () => {
     chrome.storage.sync.get('searches', function (res) {
       options = res
@@ -145,14 +173,45 @@
     })
   }
 
-  let saveOptions = () => {
-    chrome.storage.sync.set(options, () => {
-      document.getElementById('status').textContent = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'saved'
-      setTimeout(() => { document.getElementById('status').textContent = '' }, 750)
+  let setStatus = (message) => {
+    document.getElementById('status').textContent = message
+    setTimeout(() => { document.getElementById('status').textContent = '' }, 1500)
+  }
+
+  let importOptions = () => {
+    const conf = document.getElementById('import').files[0]
+    if (conf === "") return
+    const url = window.URL.createObjectURL(conf)
+    const xhr = new XMLHttpRequest()
+    xhr.open('GET', url)
+    xhr.responseType = 'json'
+    xhr.addEventListener('readystatechange', () => {
+      if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+        const searches = fromExports(xhr.response)
+        if (searches instanceof Error) {
+          myAlert('Invalid configuration', searches.message)
+        } else {
+          chrome.storage.sync.set({ searches }, () => {
+            setStatus('imported')
+            const trs = [].slice.call(document.getElementById('table').children, 1)
+            for (let tr of trs) {
+              document.getElementById('table').removeChild(tr)
+            }
+            restoreOptions()
+            document.getElementById('import').value = ''
+          })
+        }
+      }
     })
+    xhr.send()
+  }
+
+  let saveOptions = () => {
+    chrome.storage.sync.set(options, () => setStatus(chrome.runtime.lastError ? chrome.runtime.lastError.message : 'saved'))
   }
 
   document.addEventListener('DOMContentLoaded', init)
   document.addEventListener('DOMContentLoaded', restoreOptions)
   document.getElementById('save').addEventListener('click', saveOptions)
+  document.getElementById('import').addEventListener('change', importOptions)
 })()

@@ -14,10 +14,14 @@ label[for="query"] {
 #confirmMessage {
   margin-bottom: 1em;
 }
+#import {
+  opacity: 0;
+}
 </style>
 </head>
 <body>
-<input type="button" id="new" value="New..."><a id="export" download="SearchExtener.conf.json">export</a>
+<a id="export" download="SearchExtener.conf.json">export</a> <label for="import"><a>import...</a></label><input type="file" id="import"><br/>
+<input type="button" id="new" value="New...">
 <table id="table">
 <tr><th>Edit</th><th>Name</th><th>OMNI</th><th>PAGE</th><th>SEL</th><th>LINK</th><th>IMG</th><th>Key</th><th>Query</th><th>Del</th></tr>
 </table>
@@ -47,6 +51,13 @@ label[for="query"] {
 <input type="submit" id="confirmConfirm" value="Confirm">
 <input type="reset" id="cancelConfirm" value="Cancel">
 </form>
+</dialog>
+<dialog id="alert">
+<form method="dialog">
+<h3 id="alertTitle"></h3>
+<hr>
+<div id="alertMessage"></div>
+<input type="submit" id="alertConfirm" value="OK">
 </dialog>
 <script src="options.js"></script>
 </body>
