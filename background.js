@@ -32,6 +32,8 @@
     const ARG_URL = '%u'
     // const ARG_CLIP = '%c'
     // const ARG_LINK = '%l'
+    const CONF_KEY = 'conf'
+    const CONF_NAME = '設定'
 
     let conf = []
     let confIdxFromName = {}
@@ -46,12 +48,13 @@
     const defSuggest = { description: 'Type search key and keyword, like "g googling"' }
     chrome.omnibox.setDefaultSuggestion(defSuggest)
 
-    // TODO: conf by omnibox
     chrome.omnibox.onInputChanged.addListener((text, suggest) => {
       const wsPos = text.search(/\s/)
       const key = text.slice(0, wsPos !== -1 ? wsPos : text.length)
       let suggests = []
-      for (let c of conf) {
+      let conf_ = conf.slice()
+      conf_.push([CONF_NAME, 0, CONF_KEY, ''])
+      for (let c of conf_) {
         if (c[IDX_KEY].indexOf(key) !== -1) {
           suggests.push({ content: c[IDX_KEY], description: `<match>${c[IDX_KEY]}</match> <dim>${c[IDX_NAME]}</dim>` })
         }
@@ -66,20 +69,28 @@
 
     chrome.omnibox.onInputEntered.addListener((text, disposition) => {
       chrome.omnibox.setDefaultSuggestion(defSuggest)
-      const wsPos = text.search(/\s/)
+      const wsPos = (x => x === -1 ? text.length : x)(text.search(/\s/))
       const key = text.slice(0, wsPos)
       const query = text.slice(wsPos).trim()
-      const url = makeURL(conf[confIdxFromKey[key]][IDX_URL], query)
-      switch (disposition) {
-        case 'currentTab':
-          chrome.tabs.update({ url })
-          break
-        case 'newForegroundTab':
-          chrome.tabs.create({ url })
-          break
-        case 'newBackgroundTab':
-          chrome.tabs.create({ url, active: false })
-          break
+      if (key === CONF_KEY) {
+        if (chrome.runtime.openOptionsPage) {
+          chrome.runtime.openOptionsPage()
+        } else {
+          window.open(chrome.runtime.getURL('options.html'))
+        }
+      } else {
+        const url = makeURL(conf[confIdxFromKey[key]][IDX_URL], query)
+        switch (disposition) {
+          case 'currentTab':
+            chrome.tabs.update({ url })
+            break
+          case 'newForegroundTab':
+            chrome.tabs.create({ url })
+            break
+          case 'newBackgroundTab':
+            chrome.tabs.create({ url, active: false })
+            break
+        }
       }
     })
 
@@ -104,8 +115,8 @@
           confIdxFromKey[conf[i][IDX_KEY]] = i
         }
         chrome.contextMenus.create({
-          title: '設定',
-          id: '設定',
+          title: CONF_NAME,
+          id: CONF_KEY,
           contexts: ['page', 'selection', 'link', 'image'],
           parentId: 'root'
         })
@@ -115,7 +126,7 @@
     // TODO: open in current tab, next tab
     chrome.contextMenus.onClicked.addListener((info, tab) => {
       console.log(info)
-      if (info.menuItemId === '設定') {
+      if (info.menuItemId === CONF_KEY) {
         if (chrome.runtime.openOptionsPage) {
           chrome.runtime.openOptionsPage()
         } else {
