@@ -18,15 +18,15 @@
 
     // TODO: possible extension: restricted to specific URL
     const IDX_NAME = 0
-    // const IDX_TARGET = 1
+    const IDX_TARGET = 1
     const IDX_KEY = 2
     const IDX_URL = 3
     // const IDX_ISPOST = 4
     // const TARGET_OMNIBOX = 1
-    // const TARGET_PAGE = 2
-    // const TARGET_SELECTION = 4
-    // const TARGET_LINK = 8
-    // const TARGET_IMAGE = 16
+    const TARGET_PAGE = 2
+    const TARGET_SELECTION = 4
+    const TARGET_LINK = 8
+    const TARGET_IMAGE = 16
     const ARG_ANY = '%*'
     const ARG_SELTEXT = '%t'
     const ARG_URL = '%u'
@@ -83,20 +83,23 @@
       }
     })
 
+    const contextsSpec = { [TARGET_PAGE]: 'page', [TARGET_SELECTION]: 'selection', [TARGET_LINK]: 'link', [TARGET_IMAGE]: 'image' }
     function setupMenu () {
       chrome.storage.sync.get('searches', (newconf) => {
         conf = newconf.searches
         confIdxFromName = {}
         confIdxFromKey = {}
-    // TODO: appropriate contexts handling
         chrome.contextMenus.create({title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image']})
         for (let i = 0; i < conf.length; ++i) {
-          chrome.contextMenus.create({
-            title: conf[i][IDX_NAME],
-            id: conf[i][IDX_NAME],
-            contexts: ['page', 'selection', 'link', 'image'],
-            parentId: 'root'
-          })
+          const contexts = Object.keys(contextsSpec).filter(x => conf[i][IDX_TARGET] & x).map(x => contextsSpec[x])
+          if (contexts.length !== 0) {
+            chrome.contextMenus.create({
+              title: conf[i][IDX_NAME],
+              id: conf[i][IDX_NAME],
+              contexts,
+              parentId: 'root'
+            })
+          }
           confIdxFromName[conf[i][IDX_NAME]] = i
           confIdxFromKey[conf[i][IDX_KEY]] = i
         }
