@@ -95,7 +95,7 @@
       chrome.omnibox.setDefaultSuggestion(defSuggest)
       const wsPos = (x => x === -1 ? text.length : x)(text.search(/\s/))
       const key = text.slice(0, wsPos)
-      const query = text.slice(wsPos).trim()
+      const selectionText = text.slice(wsPos).trim()
       if (key === CONF_KEY) {
         if (chrome.runtime.openOptionsPage) {
           chrome.runtime.openOptionsPage()
@@ -103,7 +103,7 @@
           window.open(chrome.runtime.getURL('options.html'))
         }
       } else {
-        const url = makeURL(conf[confIdxFromKey[key]][IDX_URL], query)
+        const url = makeURL(conf[confIdxFromKey[key]][IDX_URL], { selectionText })
         switch (disposition) {
           case 'currentTab':
             chrome.tabs.update({ url })
