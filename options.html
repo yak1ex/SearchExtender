@@ -23,7 +23,7 @@ label[for="query"] {
 <a id="export" download="SearchExtener.conf.json">export</a> <label for="import"><a>import...</a></label><input type="file" id="import"><br/>
 <input type="button" id="new" value="New...">
 <table id="table">
-<tr><th>Edit</th><th>Name</th><th>OMNI</th><th>PAGE</th><th>SEL</th><th>LINK</th><th>IMG</th><th>Key</th><th>Query</th><th>Del</th></tr>
+<tr><th>Edit</th><th>Name</th><th>OMNI</th><th>PAGE</th><th>SEL</th><th>LINK</th><th>IMG</th><th>Key</th><th>Query</th><th>CurPage</th><th>Del</th></tr>
 </table>
 <div id="status"></div>
 <input type="button" id="save" value="Save">
@@ -39,6 +39,7 @@ label[for="query"] {
 <label for="image">image</label><input type="checkbox" name="image" id="image"><br/>
 <label for="key">key</label><input type="text" name="key" id="key"><br/>
 <label for="query">query</label><textarea name="query" id="query"></textarea><br/>
+<label for="curpage">curpage</label><input type="checkbox" name="curpage" id="curpage"><br/>
 <input type="submit" id="update" value="">
 <input type="reset" id="cancel" value="Cancel">
 </form>

@@ -2,13 +2,13 @@
   'use strict'
 
   /* global chrome */
-  // TODO: configuration
+  // TODO: SearchExtender scheme for bridging to executables
 
   const defConf = {
     searches: [
-      ['Google', 5, 'g', 'http://www.google.co.jp/search?q=%t'],
-      ['Wikipedia(JP)', 5, 'wj', 'https://ja.wikipedia.org/wiki/%t'],
-      ['Wikipedia(EN)', 5, 'we', 'https://en.wikipedia.org/wiki/%t']
+      ['Google', 5, 'g', 'http://www.google.co.jp/search?q=%t', false],
+      ['Wikipedia(JP)', 5, 'wj', 'https://ja.wikipedia.org/wiki/%t', false],
+      ['Wikipedia(EN)', 5, 'we', 'https://en.wikipedia.org/wiki/%t', false]
     ]
   }
   chrome.storage.sync.get({ searches: [], init: false }, (res) => {
@@ -21,7 +21,8 @@
     const IDX_TARGET = 1
     const IDX_KEY = 2
     const IDX_URL = 3
-    // const IDX_ISPOST = 4
+    const IDX_CURPAGE = 4
+    // const IDX_ISPOST = 5
     // const TARGET_OMNIBOX = 1
     const TARGET_PAGE = 2
     const TARGET_SELECTION = 4
@@ -30,8 +31,8 @@
     const ARG_ANY = '%*'
     const ARG_SELTEXT = '%t'
     const ARG_URL = '%u'
-    // const ARG_CLIP = '%c'
-    // const ARG_LINK = '%l'
+    const ARG_CLIP = '%c'
+    const ARG_LINK = '%l'
     const CONF_KEY = 'conf'
     const CONF_NAME = '設定'
 
@@ -39,10 +40,14 @@
     let confIdxFromName = {}
     let confIdxFromKey = {}
 
-    function makeURL (spec, text, url) {
-      if (text === undefined) text = ''
-      if (url === undefined) url = ''
-      return spec.replace(ARG_SELTEXT, text).replace(ARG_URL, url).replace(ARG_ANY, text || url)
+    function emptify (val) { return val === undefined ? '' : val }
+    function makeURL (spec, info, clip_) {
+      const text = emptify(info.selectionText)
+      const link = emptify(info.linkUrl)
+      const src = emptify(info.srcUrl)
+      const page = emptify(info.pageUrl)
+      const clip = emptify(clip_)
+      return spec.replace(ARG_SELTEXT, text).replace(ARG_LINK, link).replace(ARG_URL, src || page).replace(ARG_ANY, text || src || link || page).replace(ARG_CLIP, clip)
     }
 
     const defSuggest = { description: 'Type search key and keyword, like "g googling"' }
@@ -123,7 +128,6 @@
       })
     }
 
-    // TODO: open in current tab, next tab
     chrome.contextMenus.onClicked.addListener((info, tab) => {
       console.log(info)
       if (info.menuItemId === CONF_KEY) {
@@ -133,8 +137,33 @@
           window.open(chrome.runtime.getURL('options.html'))
         }
       } else {
-        const url = makeURL(conf[confIdxFromName[info.menuItemId]][IDX_URL], info.selectionText, info.linkUrl || info.srcUrl || info.pageUrl)
-        chrome.tabs.create({ url })
+        const spec = conf[confIdxFromName[info.menuItemId]]
+        new Promise((resolve, reject) => {
+          if (spec[IDX_URL].indexOf(ARG_CLIP) !== -1) {
+            chrome.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
+              if (granted) {
+                const ta = document.createElement('textarea')
+                document.body.appendChild(ta)
+                ta.focus()
+                document.execCommand('paste')
+                document.body.removeChild(ta)
+                resolve(ta.value)
+              }
+              resolve(undefined)
+            })
+          } else resolve(undefined)
+        }).then(clip => {
+          const url = makeURL(spec[IDX_URL], info, clip)
+          if (spec[IDX_CURPAGE]) {
+            chrome.permissions.request({ permissions: ['activeTab'] }, (granted) => {
+              if (granted) {
+                chrome.tabs.update({ url })
+              } else {
+                chrome.tabs.create({ url })
+              }
+            })
+          } else chrome.tabs.create({ url })
+        })
       }
     })
 

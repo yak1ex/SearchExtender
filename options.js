@@ -56,6 +56,7 @@
     targetKey.forEach(id => { document.getElementById(id).checked = false })
     document.getElementById('key').value = ''
     document.getElementById('query').value = ''
+    document.getElementById('curpage').checked = false
   }
 
   let setDetail = v => {
@@ -65,6 +66,7 @@
     targetKeyVal.forEach(vv => { document.getElementById(vv[0]).checked = ((v[1] & vv[1]) !== 0) })
     document.getElementById('key').value = v[2]
     document.getElementById('query').value = v[3]
+    document.getElementById('curpage').value = v[4]
   }
 
   let fromDetail = () => {
@@ -73,7 +75,7 @@
       targetKeyVal.reduce((acc, vv) => acc + (document.getElementById(vv[0]).checked ? vv[1] : 0), 0),
       document.getElementById('key').value,
       document.getElementById('query').value,
-      false // FIXME
+      document.getElementById('curpage').checked
     ]
   }
 
@@ -102,6 +104,10 @@
     }
     tr.appendChild(document.createElement('td')).innerText = v[2]
     tr.appendChild(document.createElement('td')).innerText = v[3]
+    let cbCurpage = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
+    cbCurpage.setAttribute('type', 'checkbox')
+    if (v[4]) cbCurpage.checked = true
+    cbCurpage.disabled = true
     let delButton = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
     delButton.setAttribute('type', 'button')
     delButton.setAttribute('value', 'Del...')
@@ -134,7 +140,7 @@
       for (let kv of targetKeyVal) {
         if (v[1] & kv[1]) target[kv[0]] = true
       }
-      result.push([v[0], target, v[2], v[3]])
+      result.push([v[0], target, v[2], v[3], v[4]])
     }
     return JSON.stringify(result, null, 2)
   }
@@ -145,7 +151,7 @@
     if (!(searches instanceof Array)) return new Error('root is not an array')
     try {
       searches.forEach((v, idx) => {
-        if (!(v instanceof Array) || v.length !== 4) throw new Error(`The ${idx+1}-th entry is not a 4-element array`)
+        if (!(v instanceof Array) || v.length !== 5) throw new Error(`The ${idx+1}-th entry is not a 5-element array`)
         if (typeof v[1] !== 'object') throw new Error(`The 2nd element of ${idx+1}-th entry is not an object`)
         const unknown = Object.keys(v[1]).filter(x => targetKey.indexOf(x) === -1)
         if (unknown.length !== 0) throw new Error(`unknown key ${unknown.join(', ')} is used in ${idx+1}-th entry`)
@@ -153,7 +159,7 @@
         for (let kv of targetKeyVal) {
           if (kv[0] in v[1]) bits += kv[1]
         }
-        results.push([v[0], bits, v[2], v[3]])
+        results.push([v[0], bits, v[2], v[3], v[4]])
       })
     } catch(e) {
       return e
