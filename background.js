@@ -40,6 +40,25 @@
     let confIdxFromName = {}
     let confIdxFromKey = {}
 
+    function base64url_encode (str) {
+      let dat = str.split('').map(x => x.charCodeAt(0)).reduce((acc, cur) => {
+        if(cur > 255) acc.push(cur % 256, Math.floor(cur / 256))
+        else acc.push(cur)
+        return acc
+      }, []).reduce((acc, cur) => {
+        let bits = 8 + acc[0]
+        let val = (acc[1] << 8) + cur
+        while (bits >= 6) {
+          acc[2].push(val >> (bits - 6))
+          val &= ((1 << (bits - 6)) - 1)
+          bits -= 6
+        }
+        return [bits, val, acc[2]]
+      }, [0, 0, []])
+      if (dat[0] > 0) dat[2].push(dat[1]<<(6-dat[0]))
+      return dat[2].map(x => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[x])
+    }
+
     function emptify (val) { return val === undefined ? '' : val }
     function makeURL (spec, info, clip_) {
       const text = emptify(info.selectionText)
