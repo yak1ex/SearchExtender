@@ -2,7 +2,8 @@
   'use strict'
 
   /* global chrome */
-  // TODO: import/export feature
+  // TODO: Use contentEditable feature
+  // TODO: Call getElementById() at one place
 
   let options
 

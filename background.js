@@ -2,7 +2,7 @@
   'use strict'
 
   /* global chrome */
-  // TODO: SearchExtender scheme for bridging to executables
+  // TODO: POST support by referring https://stackoverflow.com/questions/7387217
 
   const defConf = {
     searches: [
@@ -16,6 +16,7 @@
       chrome.storage.sync.set(defConf)
     }
 
+    // TODO: extract contant table for, at least, config index
     // TODO: possible extension: restricted to specific URL
     const IDX_NAME = 0
     const IDX_TARGET = 1
@@ -42,8 +43,7 @@
 
     function base64url_encode (str) {
       let dat = str.split('').map(x => x.charCodeAt(0)).reduce((acc, cur) => {
-        if(cur > 255) acc.push(cur % 256, Math.floor(cur / 256))
-        else acc.push(cur)
+        acc.push(cur % 256, Math.floor(cur / 256))
         return acc
       }, []).reduce((acc, cur) => {
         let bits = 8 + acc[0]
@@ -56,7 +56,7 @@
         return [bits, val, acc[2]]
       }, [0, 0, []])
       if (dat[0] > 0) dat[2].push(dat[1]<<(6-dat[0]))
-      return dat[2].map(x => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[x])
+      return dat[2].map(x => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[x]).join('')
     }
 
     function emptify (val) { return val === undefined ? '' : val }
@@ -66,7 +66,12 @@
       const src = emptify(info.srcUrl)
       const page = emptify(info.pageUrl)
       const clip = emptify(clip_)
-      return spec.replace(ARG_SELTEXT, text).replace(ARG_LINK, link).replace(ARG_URL, src || page).replace(ARG_ANY, text || src || link || page).replace(ARG_CLIP, clip)
+      let url = spec.replace(ARG_SELTEXT, text).replace(ARG_LINK, link).replace(ARG_URL, src || page).replace(ARG_ANY, text || src || link || page).replace(ARG_CLIP, clip)
+      const match = url.match(/^(SearchExtender:\/\/)(.*)$/i)
+      if(match) {
+        url = match[1] + base64url_encode(match[2])
+      }
+      return url
     }
 
     const defSuggest = { description: 'Type search key and keyword, like "g googling"' }
@@ -91,6 +96,7 @@
       }
     })
 
+    // TODO: curpage override?
     chrome.omnibox.onInputEntered.addListener((text, disposition) => {
       chrome.omnibox.setDefaultSuggestion(defSuggest)
       const wsPos = (x => x === -1 ? text.length : x)(text.search(/\s/))
@@ -147,6 +153,7 @@
       })
     }
 
+    // FIXME: clipboard handling should be done in makeURL
     chrome.contextMenus.onClicked.addListener((info, tab) => {
       console.log(info)
       if (info.menuItemId === CONF_KEY) {
