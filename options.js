@@ -188,6 +188,7 @@
     const conf = document.getElementById('import').files[0]
     if (conf === "") return
     const url = window.URL.createObjectURL(conf)
+    document.getElementById('import').value = ''
     const xhr = new XMLHttpRequest()
     xhr.open('GET', url)
     xhr.responseType = 'json'
@@ -204,7 +205,6 @@
               document.getElementById('table').removeChild(tr)
             }
             restoreOptions()
-            document.getElementById('import').value = ''
           })
         }
       }
