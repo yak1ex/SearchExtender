@@ -6,9 +6,9 @@
 
   const defConf = {
     searches: [
-      ['Google', 5, 'g', 'http://www.google.co.jp/search?q=%t', false],
-      ['Wikipedia(JP)', 5, 'wj', 'https://ja.wikipedia.org/wiki/%t', false],
-      ['Wikipedia(EN)', 5, 'we', 'https://en.wikipedia.org/wiki/%t', false]
+      ['Google', 5, 'g', 'http://www.google.co.jp/search?q=%s', false],
+      ['Wikipedia(JP)', 5, 'wj', 'https://ja.wikipedia.org/wiki/%s', false],
+      ['Wikipedia(EN)', 5, 'we', 'https://en.wikipedia.org/wiki/%s', false]
     ]
   }
   chrome.storage.sync.get({ searches: [], init: false }, (res) => {
@@ -29,7 +29,7 @@
     const TARGET_LINK = 8
     const TARGET_IMAGE = 16
     const ARG_ANY = '%*'
-    const ARG_SELTEXT = '%t'
+    const ARG_SELTEXT = '%s'
     const ARG_URL = '%u'
     const ARG_CLIP = '%c'
     const ARG_LINK = '%l'
