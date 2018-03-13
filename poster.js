@@ -8,15 +8,15 @@
 
     // code from https://stackoverflow.com/a/7404033/934239
     let form = document.createElement("form")
-    form.setAttribute("method", "post")
-    form.setAttribute("action", message.url)
+    form.method = 'post'
+    form.action = message.url
     for (let key in message.data) {
       let values = (message.data[key] instanceof Array) ? message.data[key] : [message.data[key]]
       for (let value of values) {
-        let hiddenField = document.createElement("input")
-        hiddenField.setAttribute("type", "hidden")
-        hiddenField.setAttribute("name", key)
-        hiddenField.setAttribute("value", value)
+        let hiddenField = document.createElement('input')
+        hiddenField.type = 'hidden'
+        hiddenField.name = key
+        hiddenField.value = value
         form.appendChild(hiddenField)
       }
     }

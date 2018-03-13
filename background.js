@@ -2,6 +2,7 @@
   'use strict'
 
   /* global chrome */
+  // TODO: charset conversion
 
   const defConf = {
     searches: [
