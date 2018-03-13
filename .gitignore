@@ -1,2 +1,5 @@
 *.BAK
 exe/*.exe
+chrome/
+firefox/
+node_modules/

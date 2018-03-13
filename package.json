@@ -1,0 +1,23 @@
+{
+  "name": "search_extender",
+  "version": "0.0.1",
+  "description": "Search extender for omnibox and context menu",
+  "main": "gulpfile.js",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-rename": "^1.2.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yak1ex/SearchExtender.git"
+  },
+  "private": true,
+  "author": "yak_ex",
+  "bugs": {
+    "url": "https://github.com/yak1ex/SearchExtender/issues"
+  },
+  "homepage": "https://github.com/yak1ex/SearchExtender#readme"
+}
