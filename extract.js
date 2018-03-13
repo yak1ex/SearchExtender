@@ -32,17 +32,15 @@
     false,
     ${post}
   ]`
-    chrome.permissions.request({ permissions: ['clipboardWrite'] }, (granted) => {
-      if (granted) {
-        let copyFrom = document.createElement('textarea')
-        copyFrom.textContent = content
-        document.body.appendChild(copyFrom)
-        copyFrom.select()
-        document.execCommand('copy')
-        document.body.removeChild(copyFrom)
-        if (window.confirm('Open option page?\nYou can paste the following content from clipboard to "New from text":\n' + content)) {
-          chrome.runtime.sendMessage({ command: "showOption" })
-        }
-      }
-    })
+
+    let copyFrom = document.createElement('textarea')
+    copyFrom.textContent = content
+    document.body.appendChild(copyFrom)
+    copyFrom.select()
+    document.execCommand('copy')
+    document.body.removeChild(copyFrom)
+    if (window.confirm('Open option page?\nYou can paste the following content from clipboard to "New from text":\n' + content)) {
+      chrome.runtime.sendMessage({ command: "showOption" })
+    }
+  }
 })()

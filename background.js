@@ -233,7 +233,7 @@
       if (info.menuItemId === CONF_KEY) {
         showOption()
       } else if (info.menuItemId === EXTRACT_KEY) {
-        chrome.permissions.request({ permissions: ['activeTab'] }, (granted) => {
+        chrome.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }, (granted) => {
           if (granted) {
             // Invoked in contextMenu, so active tab in active frame assumed
             // chrome.tabs.executeScript(tab.id, { frameId: info.frameId, file: 'extract.js' })
