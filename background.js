@@ -1,7 +1,7 @@
 (function () {
   'use strict'
 
-  /* global chrome */
+  /* global browser */
   // TODO: charset conversion
 
   const defConf = {
@@ -11,9 +11,9 @@
       ['Wikipedia(EN)', 5, 'we', 'https://en.wikipedia.org/wiki/%s', false, false]
     ]
   }
-  chrome.storage.sync.get({ searches: [], init: false }, (res) => {
+  browser.storage.sync.get({ searches: [], init: false }, (res) => {
     if (!res.init) {
-      chrome.storage.sync.set(defConf)
+      browser.storage.sync.set(defConf)
     }
 
     // TODO: extract contant table for, at least, config index
@@ -77,15 +77,15 @@
       return function (tab) {
         let handler = function (tabId, changeInfo) {
           if (tabId === tab.id && changeInfo.status === "complete"){
-            chrome.tabs.onUpdated.removeListener(handler)
-            chrome.tabs.sendMessage(tabId, { url: url, data: data })
+            browser.tabs.onUpdated.removeListener(handler)
+            browser.tabs.sendMessage(tabId, { url: url, data: data })
           }
         }
 
         // in case we're faster than page load (usually):
-        chrome.tabs.onUpdated.addListener(handler);
+        browser.tabs.onUpdated.addListener(handler);
         // just in case we're too late with the listener:
-        chrome.tabs.sendMessage(tab.id, { url: url, data: data })
+        browser.tabs.sendMessage(tab.id, { url: url, data: data })
       }
     }
 
@@ -108,19 +108,19 @@
       return new Promise((resolve, reject) => {
         switch (disposition) {
           case 'currentTab':
-            chrome.permissions.request({ permissions: ['activeTab'] }, (granted) => {
+            browser.permissions.request({ permissions: ['activeTab'] }, (granted) => {
               if (granted) {
-                chrome.tabs.update({ url }, tab => resolve(tab))
+                browser.tabs.update({ url }, tab => resolve(tab))
               } else {
-                 chrome.tabs.create({ url }, tab => resolve(tab))
+                 browser.tabs.create({ url }, tab => resolve(tab))
               }
             })
             break
           case 'newForegroundTab':
-            chrome.tabs.create({ url }, tab => resolve(tab))
+            browser.tabs.create({ url }, tab => resolve(tab))
             break
           case 'newBackgroundTab':
-            chrome.tabs.create({ url, active: false }, tab => resolve(tab))
+            browser.tabs.create({ url, active: false }, tab => resolve(tab))
             break
         }
       })
@@ -129,7 +129,7 @@
     function jumpTo (specUrl, disposition, info, is_post) {
       return new Promise((resolve, reject) => {
         if (specUrl.indexOf(ARG_CLIP) !== -1) {
-          chrome.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
+          browser.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
             if (granted) {
               const ta = document.createElement('textarea')
               document.body.appendChild(ta)
@@ -144,7 +144,7 @@
       }).then(clip => {
         const url = makeURL(specUrl, info, clip)
         if (is_post) {
-          return setupTab(chrome.runtime.getURL("poster.html"), disposition).then(makePostHandler(url))
+          return setupTab(browser.runtime.getURL("poster.html"), disposition).then(makePostHandler(url))
         } else {
           return setupTab(url, disposition)
         }
@@ -152,9 +152,9 @@
     }
 
     const defSuggest = { description: 'Type search key and keyword, like "g googling"' }
-    chrome.omnibox.setDefaultSuggestion(defSuggest)
+    browser.omnibox.setDefaultSuggestion(defSuggest)
 
-    chrome.omnibox.onInputChanged.addListener((text, suggest) => {
+    browser.omnibox.onInputChanged.addListener((text, suggest) => {
       const wsPos = text.search(/\s/)
       const key = text.slice(0, wsPos !== -1 ? wsPos : text.length)
       let suggests = []
@@ -162,27 +162,31 @@
       conf_.push([CONF_NAME, 0, CONF_KEY, ''])
       for (let c of conf_) {
         if ((c[IDX_TARGET] & TARGET_OMNIBOX) && c[IDX_KEY].indexOf(key) !== -1) {
-          suggests.push({ content: c[IDX_KEY], description: `<match>${c[IDX_KEY]}</match> <dim>${c[IDX_NAME]}</dim>` })
+          if (browser.isFirefox) {
+            suggests.push({ content: c[IDX_KEY], description: `${c[IDX_KEY]} ${c[IDX_NAME]}` })
+          } else {
+            suggests.push({ content: c[IDX_KEY], description: `<match>${c[IDX_KEY]}</match> <dim>${c[IDX_NAME]}</dim>` })
+          }
         }
       }
       if (suggests.length === 1) {
-        chrome.omnibox.setDefaultSuggestion({ description: suggests[0].description })
+        browser.omnibox.setDefaultSuggestion({ description: suggests[0].description })
       } else {
-        chrome.omnibox.setDefaultSuggestion(defSuggest)
+        browser.omnibox.setDefaultSuggestion(defSuggest)
         suggest(suggests)
       }
     })
 
     function showOption () {
-      if (chrome.runtime.openOptionsPage) {
-        chrome.runtime.openOptionsPage()
+      if (browser.runtime.openOptionsPage) {
+        browser.runtime.openOptionsPage()
       } else {
-        window.open(chrome.runtime.getURL('options.html'))
+        window.open(browser.runtime.getURL('options.html'))
       }
     }
 
-    chrome.omnibox.onInputEntered.addListener((text, disposition) => {
-      chrome.omnibox.setDefaultSuggestion(defSuggest)
+    browser.omnibox.onInputEntered.addListener((text, disposition) => {
+      browser.omnibox.setDefaultSuggestion(defSuggest)
       const wsPos = (x => x === -1 ? text.length : x)(text.search(/\s/))
       const key = text.slice(0, wsPos)
       const selectionText = text.slice(wsPos).trim()
@@ -196,15 +200,15 @@
 
     const contextsSpec = { [TARGET_PAGE]: 'page', [TARGET_SELECTION]: 'selection', [TARGET_LINK]: 'link', [TARGET_IMAGE]: 'image' }
     function setupMenu () {
-      chrome.storage.sync.get('searches', (newconf) => {
+      browser.storage.sync.get('searches', (newconf) => {
         conf = newconf.searches
         confIdxFromName = {}
         confIdxFromKey = {}
-        chrome.contextMenus.create({title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image', 'editable']})
+        browser.contextMenus.create({title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image', 'editable']})
         for (let i = 0; i < conf.length; ++i) {
           const contexts = Object.keys(contextsSpec).filter(x => conf[i][IDX_TARGET] & x).map(x => contextsSpec[x])
           if (contexts.length !== 0) {
-            chrome.contextMenus.create({
+            browser.contextMenus.create({
               title: conf[i][IDX_NAME],
               id: conf[i][IDX_NAME],
               contexts,
@@ -214,13 +218,13 @@
           confIdxFromName[conf[i][IDX_NAME]] = i
           confIdxFromKey[conf[i][IDX_KEY]] = i
         }
-        chrome.contextMenus.create({
+        browser.contextMenus.create({
           title: CONF_NAME,
           id: CONF_KEY,
           contexts: ['page', 'selection', 'link', 'image'],
           parentId: 'root'
         })
-        chrome.contextMenus.create({
+        browser.contextMenus.create({
           title: EXTRACT_NAME,
           id: EXTRACT_KEY,
           contexts: ['editable'],
@@ -229,31 +233,36 @@
       })
     }
 
-    chrome.contextMenus.onClicked.addListener((info, tab) => {
+    browser.contextMenus.onClicked.addListener((info, tab) => {
       console.log(info)
       if (info.menuItemId === CONF_KEY) {
         showOption()
       } else if (info.menuItemId === EXTRACT_KEY) {
-        chrome.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }, (granted) => {
+        const handler = (granted) => {
           if (granted) {
             // Invoked in contextMenu, so active tab in active frame assumed
-            // chrome.tabs.executeScript(tab.id, { frameId: info.frameId, file: 'extract.js' })
-            chrome.tabs.executeScript({ file: 'extract.js' })
+            // browser.tabs.executeScript(tab.id, { frameId: info.frameId, file: 'extract.js' })
+            browser.tabs.executeScript({ file: 'multiua.js' })
+            browser.tabs.executeScript({ file: 'extract.js' })
           }
-        })
+        }
+        // FIXME: Currently, firefox can't handle browser.permissions.request correctly here (in background.js?)
+//        if (browser.isFirefox) { browser.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }).then(handler).catch(e => console.log(e.message)) }
+        if (browser.isFirefox) { handler(true) }
+        else { browser.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }, handler) }
       } else {
         const spec = conf[confIdxFromName[info.menuItemId]]
         jumpTo(spec[IDX_URL], spec[IDX_CURTAB] ? 'currentTab' : 'newForegroundTab', info, spec[IDX_ISPOST])
       }
     })
 
-    chrome.storage.onChanged.addListener((changes, area) => {
+    browser.storage.onChanged.addListener((changes, area) => {
       if (area === 'sync') {
-        if ('searches' in changes) chrome.contextMenus.removeAll(() => setupMenu())
+        if ('searches' in changes) browser.contextMenus.removeAll(() => setupMenu())
       }
     })
 
-    chrome.runtime.onMessage.addListener((dat) => {
+    browser.runtime.onMessage.addListener((dat) => {
       switch(dat.command) {
         case 'showOption':
           showOption()

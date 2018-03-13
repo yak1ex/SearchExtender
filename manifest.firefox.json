@@ -9,12 +9,17 @@
   },
   "background": {
     "persistent": false,
-    "scripts": ["background.js"]
+    "scripts": ["multiua.js","background.js"]
   },
   "options_ui": {
     "page": "options.html",
     "chrome_style": true
   },
-  "permissions": [ "contextMenus", "storage" ],
-  "optional_permissions": [ "activeTab", "clipboardRead", "clipboardWrite" ]
+  "permissions": [ "contextMenus", "storage", "activeTab" ],
+  "optional_permissions": [ "clipboardRead", "clipboardWrite" ],
+  "applications": {
+    "gecko": {
+      "id": "SearchExtender@yak1ex.github.io"
+    }
+  }
 }

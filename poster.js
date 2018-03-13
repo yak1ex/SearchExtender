@@ -4,7 +4,7 @@
   // from https://stackoverflow.com/a/23687543 with style change and multiple value support
   let onMessageHandler = function(message){
     // Ensure it is run only once, as we will try to message twice
-    chrome.runtime.onMessage.removeListener(onMessageHandler)
+    browser.runtime.onMessage.removeListener(onMessageHandler)
 
     // code from https://stackoverflow.com/a/7404033/934239
     let form = document.createElement("form")
@@ -24,5 +24,5 @@
     form.submit()
   }
 
-  chrome.runtime.onMessage.addListener(onMessageHandler)
+  browser.runtime.onMessage.addListener(onMessageHandler)
 })()

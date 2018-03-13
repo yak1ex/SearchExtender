@@ -1,8 +1,9 @@
 (function () {
   'use strict'
 
-  /* global chrome */
+  /* global browser */
   // TODO: Use contentEditable feature
+  // TODO: <dialog> works only on Chrome
 
   let options
   let elem = new Proxy({}, {
@@ -248,7 +249,7 @@
   }
 
   let restoreOptions = () => {
-    chrome.storage.sync.get('searches', function (res) {
+    browser.storage.sync.get('searches', function (res) {
       options = res
       options.init = true
       for (let i = 0; i < options.searches.length; ++i) {
@@ -278,7 +279,7 @@
         if (searches instanceof Error) {
           myAlert('Invalid configuration', searches.message)
         } else {
-          chrome.storage.sync.set({ searches }, () => {
+          browser.storage.sync.set({ searches }, () => {
             setStatus('imported')
             const trs = [].slice.call(elem.table.children, 1)
             for (let tr of trs) {
@@ -293,7 +294,7 @@
   }
 
   let saveOptions = () => {
-    chrome.storage.sync.set(options, () => setStatus(chrome.runtime.lastError ? chrome.runtime.lastError.message : 'saved'))
+    browser.storage.sync.set(options, () => setStatus(browser.runtime.lastError ? browser.runtime.lastError.message : 'saved'))
   }
 
   document.addEventListener('DOMContentLoaded', init)

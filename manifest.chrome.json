@@ -1,0 +1,20 @@
+{
+  "name": "SearchExtender",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "Search extender for omnibox and contextmenu",
+  "author": "yak_ex",
+  "omnibox": {
+    "keyword" : "go"
+  },
+  "background": {
+    "persistent": false,
+    "scripts": ["multiua.js","background.js"]
+  },
+  "options_ui": {
+    "page": "options.html",
+    "chrome_style": true
+  },
+  "permissions": [ "contextMenus", "storage" ],
+  "optional_permissions": [ "activeTab", "clipboardRead", "clipboardWrite" ]
+}
