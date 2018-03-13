@@ -40,10 +40,10 @@
     elem.confirm.showModal()
   }
 
-  let checkValidity = (v) => {
+  let checkValidity = (v, curname, curkey) => {
     if (v[0] === '') return 'Empty name'
-    if (options.searches.map(x => x[0]).indexOf(v[0]) !== -1) return `name: '${v[0]}' is already used`
-    if (v[2] !== '' && options.searches.map(x => x[2]).indexOf(v[2]) !== -1) return `key: '${v[2]}' is already used`
+    if (v[0] !== curname && options.searches.map(x => x[0]).indexOf(v[0]) !== -1) return `name: '${v[0]}' is already used`
+    if (v[2] !== '' && v[2] !== curkey && options.searches.map(x => x[2]).indexOf(v[2]) !== -1) return `key: '${v[2]}' is already used`
     if (v[3] === '') return 'Empty query'
     return null
   }
@@ -52,7 +52,7 @@
     let cbTrue, cbFalse
     let makeCb = (f) => (e) => {
       if (f) {
-        const err = checkValidity(fromDetail())
+        const err = checkValidity(fromDetail(), elem.name.getAttribute('data-current'), elem.key.getAttribute('data-current'))
         if (err) {
           e.preventDefault()
           myAlert('Invalid conf', err)
@@ -75,9 +75,11 @@
     elem.update.value = 'Add'
     elem.heading.textContent = 'New search config'
     elem.name.value = ''
+    elem.name.setAttribute('data-current', '')
     elem.omnibox.checked = false
     targetKey.forEach(id => { elem[id].checked = false })
     elem.key.value = ''
+    elem.key.setAttribute('data-current', '')
     elem.query.value = ''
     elem.curtab.checked = false
     elem.post.checked = false
@@ -87,8 +89,10 @@
     elem.update.value = 'Update'
     elem.heading.textContent = 'Edit search config'
     elem.name.value = v[0]
+    elem.name.setAttribute('data-current', v[0])
     targetKeyVal.forEach(vv => { elem[vv[0]].checked = ((v[1] & vv[1]) !== 0) })
     elem.key.value = v[2]
+    elem.key.setAttribute('data-current', v[2])
     elem.query.value = v[3]
     elem.curtab.checked = v[4]
     elem.post.checked = v[5]
@@ -115,7 +119,7 @@
           myAlert('Invalid configuration', v.message)
           return
         } else {
-          const err = checkValidity(v[0])
+          const err = checkValidity(v[0], '', '')
           if (err) {
             e.preventDefault()
             myAlert('Invalid configuration', err)
