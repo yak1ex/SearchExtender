@@ -1,9 +1,73 @@
+#define _WIN32_WINNT 0x0601
 #include <windows.h>
+#include <Shellapi.h>
 #include <Strsafe.h>
 
 #include <vector>
 
 // TODO: register and unregister URL protocol handler
+
+// http://eternalwindows.jp/security/securitycontext/securitycontext03.html
+
+enum class AdminState {
+	ADMIN, ADMIN_IN_UAC, OTHER
+};
+
+AdminState GetAdminState()
+{
+	HANDLE hToken;
+	DWORD dwLength;
+	PTOKEN_GROUPS pTokenGroups;
+	PSID pSidAdministrators;
+	SID_IDENTIFIER_AUTHORITY sidIdentifier = SECURITY_NT_AUTHORITY;
+
+	AllocateAndInitializeSid(&sidIdentifier, 2, SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &pSidAdministrators);
+
+	if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+		return AdminState::OTHER;
+	}
+	GetTokenInformation(hToken, TokenGroups, NULL, 0, &dwLength);
+	pTokenGroups = (PTOKEN_GROUPS)LocalAlloc(LPTR, dwLength);
+	GetTokenInformation(hToken, TokenGroups, pTokenGroups, dwLength, &dwLength);
+
+	AdminState ret = AdminState::OTHER;
+	for (int i = 0; i < pTokenGroups->GroupCount; i++) {
+		if (EqualSid(pTokenGroups->Groups[i].Sid, pSidAdministrators)) {
+			ret = (pTokenGroups->Groups[i].Attributes & SE_GROUP_ENABLED) ? AdminState::ADMIN : AdminState::ADMIN_IN_UAC;
+		}
+	}
+
+	LocalFree(pTokenGroups);
+	CloseHandle(hToken);
+	FreeSid(pSidAdministrators);
+	return ret;
+}
+
+BOOL ShowElevationConfirmation(LPCSTR lpszText, LPCSTR lpszCaption)
+{
+	SHSTOCKICONINFO ssii = { sizeof(SHSTOCKICONINFO) };
+	BOOL ret = FALSE;
+	if(SUCCEEDED(SHGetStockIconInfo(SIID_SHIELD, SHGSI_ICONLOCATION, &ssii))) {
+		HMODULE hModule = LoadLibraryW(ssii.szPath);
+		MSGBOXPARAMS mbp = { sizeof(MSGBOXPARAMS) };
+		mbp.hInstance = hModule;
+		mbp.lpszText = lpszText;
+		mbp.lpszCaption = lpszCaption;
+		mbp.dwStyle = MB_YESNO | MB_DEFBUTTON2 | MB_USERICON;
+		mbp.lpszIcon = MAKEINTRESOURCE(-ssii.iIcon);
+		ret = MessageBoxIndirect(&mbp) == IDYES;
+		FreeLibrary(hModule);
+	}
+	return ret;
+}
+
+void ExecuteWithElevation()
+{
+	char szModulePath[MAX_PATH];
+
+	GetModuleFileName(NULL, szModulePath, sizeof(szModulePath));
+	ShellExecute(NULL, "runas", szModulePath, NULL, NULL, SW_SHOWNORMAL); // will show UAC dialog
+}
 
 inline unsigned char Conv(char c)
 {
