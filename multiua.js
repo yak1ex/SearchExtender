@@ -1,4 +1,5 @@
-(function(){
+(function () {
+  /* global browser chrome */
   if (!('browser' in window) || browser.isChrome === undefined) {
     const CHROME = 1
     const EDGE = 2

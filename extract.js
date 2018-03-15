@@ -1,8 +1,9 @@
-(function(){
+(function () {
+  /* global browser */
   if (document.activeElement.form) {
     const form = document.activeElement.form
     const name = document.activeElement.name
-    const post = form.method === "post"
+    const post = form.method === 'post'
     const queryDelim = (post && form.action.indexOf('?') !== -1) ? '??' : '?'
 
     let query = []
@@ -20,7 +21,7 @@
     }
     const url = form.action + queryDelim + query.join('&')
 
-    const content = 
+    const content =
 `  [
     "Name: ${document.title}",
     {
@@ -42,7 +43,7 @@
         document.execCommand('copy')
         document.body.removeChild(copyFrom)
         if (window.confirm('Open option page?\nYou can paste the following content from clipboard to "New from text":\n' + content)) {
-          browser.runtime.sendMessage({ command: "showOption" })
+          browser.runtime.sendMessage({ command: 'showOption' })
         }
       }
     }

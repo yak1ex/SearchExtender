@@ -1,9 +1,8 @@
 (function () {
   'use strict'
 
-  /* global browser */
+  /* global browser dialogPolyfill XMLHttpRequest */
   // TODO: Use contentEditable feature
-  // TODO: <dialog> works only on Chrome
 
   let options
   let elem = new Proxy({}, {
@@ -115,7 +114,7 @@
     let makeCb = (f) => (e) => {
       if (f) {
         const v = fromExports([JSON.parse(elem.entry.value)])
-        if(v instanceof Error) {
+        if (v instanceof Error) {
           e.preventDefault()
           myAlert('Invalid configuration', v.message)
           return
@@ -187,6 +186,9 @@
   }
 
   let init = () => {
+    if (!browser.isChrome) {
+      [].slice.call(document.querySelectorAll('dialog')).forEach(x => dialogPolyfill.registerDialog(x))
+    }
     elem.new.addEventListener('click', () => {
       initDetail()
       showDetail((f) => {
@@ -201,7 +203,7 @@
       showFromText((f) => {
         if (f) {
           const v = fromExports([JSON.parse(elem.entry.value)])
-          if(v instanceof Error) {
+          if (v instanceof Error) {
             myAlert('Invalid configuration', v.message)
           } else {
             options.searches.push(v[0])
@@ -232,17 +234,17 @@
     if (!(searches instanceof Array)) return new Error('root is not an array')
     try {
       searches.forEach((v, idx) => {
-        if (!(v instanceof Array) || v.length !== 6) throw new Error(`The ${idx+1}-th entry is not a 6-element array`)
-        if (typeof v[1] !== 'object') throw new Error(`The 2nd element of ${idx+1}-th entry is not an object`)
+        if (!(v instanceof Array) || v.length !== 6) throw new Error(`The ${idx + 1}-th entry is not a 6-element array`)
+        if (typeof v[1] !== 'object') throw new Error(`The 2nd element of ${idx + 1}-th entry is not an object`)
         const unknown = Object.keys(v[1]).filter(x => targetKey.indexOf(x) === -1)
-        if (unknown.length !== 0) throw new Error(`unknown key ${unknown.join(', ')} is used in ${idx+1}-th entry`)
+        if (unknown.length !== 0) throw new Error(`unknown key ${unknown.join(', ')} is used in ${idx + 1}-th entry`)
         let bits = 0
         for (let kv of targetKeyVal) {
           if (kv[0] in v[1]) bits += kv[1]
         }
         results.push([v[0], bits, v[2], v[3], v[4], v[5]])
       })
-    } catch(e) {
+    } catch (e) {
       return e
     }
     return results
@@ -267,7 +269,7 @@
 
   let importOptions = () => {
     const conf = elem.import.files[0]
-    if (conf === "") return
+    if (conf === '') return
     const url = window.URL.createObjectURL(conf)
     elem.import.value = ''
     const xhr = new XMLHttpRequest()

@@ -1,7 +1,7 @@
 (function () {
   'use strict'
 
-  /* global browser */
+  /* global browser URL */
   // TODO: charset conversion
 
   const defConf = {
@@ -43,7 +43,7 @@
     let confIdxFromName = {}
     let confIdxFromKey = {}
 
-    function base64url_encode (str) {
+    function base64urlEncode (str) {
       let dat = str.split('').map(x => x.charCodeAt(0)).reduce((acc, cur) => {
         acc.push(cur % 256, Math.floor(cur / 256))
         return acc
@@ -57,16 +57,16 @@
         }
         return [bits, val, acc[2]]
       }, [0, 0, []])
-      if (dat[0] > 0) dat[2].push(dat[1]<<(6-dat[0]))
-      return dat[2].map(x => "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"[x]).join('')
+      if (dat[0] > 0) dat[2].push(dat[1] << (6 - dat[0]))
+      return dat[2].map(x => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'[x]).join('')
     }
 
     // based on https://stackoverflow.com/a/23687543 with style change and multiple value support
     function makePostHandler (specUrl) {
       let data = {}
       const specUrl2 = (specUrl.indexOf('??') !== -1) ? specUrl.split('??').map(x => x.replace('?', '_')).join('?') : specUrl
-      for(let p of new URL(specUrl2).searchParams) {
-        if(p[0] in data) {
+      for (let p of new URL(specUrl2).searchParams) {
+        if (p[0] in data) {
           data[p[0]] = [data[p[0]]]
           data[p[0]].push(p[1])
         } else {
@@ -76,14 +76,14 @@
       const url = specUrl.replace((specUrl.indexOf('??') !== -1) ? /\?\?.*/ : /\?.*/, '')
       return function (tab) {
         let handler = function (tabId, changeInfo) {
-          if (tabId === tab.id && changeInfo.status === "complete"){
+          if (tabId === tab.id && changeInfo.status === 'complete') {
             browser.tabs.onUpdated.removeListener(handler)
             browser.tabs.sendMessage(tabId, { url: url, data: data })
           }
         }
 
         // in case we're faster than page load (usually):
-        browser.tabs.onUpdated.addListener(handler);
+        browser.tabs.onUpdated.addListener(handler)
         // just in case we're too late with the listener:
         browser.tabs.sendMessage(tab.id, { url: url, data: data })
       }
@@ -98,8 +98,8 @@
       const clip = emptify(clip_)
       let url = spec.replace(ARG_SELTEXT, text).replace(ARG_LINK, link).replace(ARG_URL, src || page).replace(ARG_ANY, text || src || link || page).replace(ARG_CLIP, clip)
       const match = url.match(/^(SearchExtender:\/\/)(.*)$/i)
-      if(match) {
-        url = match[1] + base64url_encode(match[2])
+      if (match) {
+        url = match[1] + base64urlEncode(match[2])
       }
       return url
     }
@@ -112,7 +112,7 @@
               if (granted) {
                 browser.tabs.update({ url }, tab => resolve(tab))
               } else {
-                 browser.tabs.create({ url }, tab => resolve(tab))
+                browser.tabs.create({ url }, tab => resolve(tab))
               }
             })
             break
@@ -126,7 +126,7 @@
       })
     }
 
-    function jumpTo (specUrl, disposition, info, is_post) {
+    function jumpTo (specUrl, disposition, info, isPost) {
       return new Promise((resolve, reject) => {
         if (specUrl.indexOf(ARG_CLIP) !== -1) {
           browser.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
@@ -143,8 +143,8 @@
         } else resolve(undefined)
       }).then(clip => {
         const url = makeURL(specUrl, info, clip)
-        if (is_post) {
-          return setupTab(browser.runtime.getURL("poster.html"), disposition).then(makePostHandler(url))
+        if (isPost) {
+          return setupTab(browser.runtime.getURL('poster.html'), disposition).then(makePostHandler(url))
         } else {
           return setupTab(url, disposition)
         }
@@ -248,8 +248,11 @@
         }
         // FIXME: Currently, firefox can't handle browser.permissions.request correctly here (in background.js?)
 //        if (browser.isFirefox) { browser.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }).then(handler).catch(e => console.log(e.message)) }
-        if (browser.isFirefox) { handler(true) }
-        else { browser.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }, handler) }
+        if (browser.isFirefox) {
+          handler(true)
+        } else {
+          browser.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }, handler)
+        }
       } else {
         const spec = conf[confIdxFromName[info.menuItemId]]
         jumpTo(spec[IDX_URL], spec[IDX_CURTAB] ? 'currentTab' : 'newForegroundTab', info, spec[IDX_ISPOST])
@@ -263,7 +266,7 @@
     })
 
     browser.runtime.onMessage.addListener((dat) => {
-      switch(dat.command) {
+      switch (dat.command) {
         case 'showOption':
           showOption()
           break
