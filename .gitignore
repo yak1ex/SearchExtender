@@ -1,5 +1,7 @@
 *.BAK
 exe/*.exe
+exe/*.o
+exe/*.obj
 chrome/
 firefox/
 node_modules/
