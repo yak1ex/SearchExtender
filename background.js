@@ -204,7 +204,7 @@
         conf = newconf.searches
         confIdxFromName = {}
         confIdxFromKey = {}
-        browser.contextMenus.create({title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image', 'editable']})
+        browser.contextMenus.create({title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image', 'editable']}, () => { if (browser.runtime.lastError) console.log(browser.runtime.lastError.messaage) })
         for (let i = 0; i < conf.length; ++i) {
           const contexts = Object.keys(contextsSpec).filter(x => conf[i][IDX_TARGET] & x).map(x => contextsSpec[x])
           if (contexts.length !== 0) {
@@ -213,7 +213,7 @@
               id: conf[i][IDX_NAME],
               contexts,
               parentId: 'root'
-            })
+            }, () => { if (browser.runtime.lastError) console.log(browser.runtime.lastError.messaage) })
           }
           confIdxFromName[conf[i][IDX_NAME]] = i
           confIdxFromKey[conf[i][IDX_KEY]] = i
@@ -223,13 +223,13 @@
           id: CONF_KEY,
           contexts: ['page', 'selection', 'link', 'image'],
           parentId: 'root'
-        })
+        }, () => { if (browser.runtime.lastError) console.log(browser.runtime.lastError.messaage) })
         browser.contextMenus.create({
           title: EXTRACT_NAME,
           id: EXTRACT_KEY,
           contexts: ['editable'],
           parentId: 'root'
-        })
+        }, () => { if (browser.runtime.lastError) console.log(browser.runtime.lastError.messaage) })
       })
     }
 
