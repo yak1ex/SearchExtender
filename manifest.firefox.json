@@ -8,7 +8,6 @@
     "keyword" : "go"
   },
   "background": {
-    "persistent": false,
     "scripts": ["multiua.js","background.js"]
   },
   "options_ui": {
