@@ -258,6 +258,8 @@
         let v = options.searches[i]
         elem.table.appendChild(createRow(v))
       }
+      // As of Chrome 65, the following bug blocks download from chrome extension popups
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=821219
       elem.export.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(makeExports(options.searches))
     })
   }
