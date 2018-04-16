@@ -29,7 +29,7 @@
     const TARGET_SELECTION = 4
     const TARGET_LINK = 8
     const TARGET_IMAGE = 16
-    const ARG_ANY = '%*'
+    const ARG_ANY = '%\\*' // '%*'
     const ARG_SELTEXT = '%s'
     const ARG_URL = '%u'
     const ARG_CLIP = '%c'
@@ -96,7 +96,11 @@
       const src = emptify(info.srcUrl)
       const page = emptify(info.pageUrl)
       const clip = emptify(clip_)
-      let url = spec.replace(ARG_SELTEXT, text).replace(ARG_LINK, link).replace(ARG_URL, src || page).replace(ARG_ANY, text || src || link || page).replace(ARG_CLIP, clip)
+      let url = spec.replace(new RegExp(ARG_SELTEXT, 'g'), text)
+        .replace(new RegExp(ARG_LINK, 'g'), link)
+        .replace(new RegExp(ARG_URL, 'g'), src || page)
+        .replace(new RegExp(ARG_ANY, 'g'), text || src || link || page)
+        .replace(new RegExp(ARG_CLIP, 'g'), clip)
       const match = url.match(/^(SearchExtender:\/\/)(.*)$/i)
       if (match) {
         url = match[1] + base64urlEncode(match[2])
