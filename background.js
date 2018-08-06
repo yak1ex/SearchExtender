@@ -42,6 +42,7 @@
     let conf = []
     let confIdxFromName = {}
     let confIdxFromKey = {}
+    let optionConf;
 
     function base64urlEncode (str) {
       let dat = str.split('').map(x => x.charCodeAt(0)).reduce((acc, cur) => {
@@ -250,12 +251,10 @@
             browser.tabs.executeScript({ file: 'extract.js' })
           }
         }
-        // FIXME: Currently, firefox can't handle browser.permissions.request correctly here (in background.js?)
-//        if (browser.isFirefox) { browser.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }).then(handler).catch(e => console.log(e.message)) }
         if (browser.isFirefox) {
-          handler(true)
+          browser.permissions.request({ permissions: ['activeTab'] }).then(handler).catch(e => console.log(e.message))
         } else {
-          browser.permissions.request({ permissions: ['activeTab', 'clipboardWrite'] }, handler)
+          browser.permissions.request({ permissions: ['activeTab'] }, handler)
         }
       } else {
         const spec = conf[confIdxFromName[info.menuItemId]]
@@ -269,10 +268,19 @@
       }
     })
 
-    browser.runtime.onMessage.addListener((dat) => {
+    browser.runtime.onMessage.addListener((dat, sender, sendResponse) => {
       switch (dat.command) {
         case 'showOption':
           showOption()
+          break
+        case 'showOptionWithConf':
+          optionConf = dat.content
+          showOption()
+          break
+        case 'queryOptionConf':
+          let conf = optionConf
+          optionConf = undefined
+          sendResponse(conf)
           break
       }
     })

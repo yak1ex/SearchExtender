@@ -21,34 +21,15 @@
     }
     const url = form.action + queryDelim + query.join('&')
 
-    const content =
-`  [
-    "Name: ${document.title}",
-    {
-      "omnibox": true,
-      "selection": true
-    },
-    "Key: Please edit",
-    "${url}",
-    false,
-    ${post}
-  ]`
+    const content = [
+      document.title,
+      5,
+      "",
+      url,
+      false,
+      post
+    ]
 
-    const paster = (f) => {
-      if (f) {
-        let copyFrom = document.createElement('textarea')
-        copyFrom.textContent = content
-        document.body.appendChild(copyFrom)
-        copyFrom.select()
-        document.execCommand('copy')
-        document.body.removeChild(copyFrom)
-        if (window.confirm('Open option page?\nYou can paste the following content from clipboard to "New from text":\n' + content)) {
-          browser.runtime.sendMessage({ command: 'showOption' })
-        }
-      }
-    }
-    if (browser.isFirefox) {
-      browser.permissions.request({ permissions: ['clipboardWrite'] }).then(paster)
-    } else paster(true)
+    browser.runtime.sendMessage({ command: 'showOptionWithConf', content: content })
   }
 })()

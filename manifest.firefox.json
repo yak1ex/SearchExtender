@@ -15,7 +15,7 @@
     "chrome_style": true
   },
   "permissions": [ "contextMenus", "storage", "activeTab" ],
-  "optional_permissions": [ "clipboardRead", "clipboardWrite" ],
+  "optional_permissions": [ "clipboardRead" ],
   "applications": {
     "gecko": {
       "id": "SearchExtender@yak1ex.github.io"

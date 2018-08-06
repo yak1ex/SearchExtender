@@ -98,6 +98,19 @@
     elem.post.checked = v[5]
   }
 
+  let setDetailNew = v => {
+    elem.update.value = 'Add'
+    elem.heading.textContent = 'New search config'
+    elem.name.value = v[0]
+    elem.name.setAttribute('data-current', '')
+    targetKeyVal.forEach(vv => { elem[vv[0]].checked = ((v[1] & vv[1]) !== 0) })
+    elem.key.value = ''
+    elem.key.setAttribute('data-current', '')
+    elem.query.value = v[3]
+    elem.curtab.checked = v[4]
+    elem.post.checked = v[5]
+  }
+
   let fromDetail = () => {
     return [
       elem.name.value,
@@ -301,6 +314,20 @@
     browser.storage.sync.set(options, () => setStatus(browser.runtime.lastError ? browser.runtime.lastError.message : 'saved'))
   }
 
+  let restoreConf = () => {
+    browser.runtime.sendMessage({ command: 'queryOptionConf' }, v => {
+      setDetailNew(v)
+      showDetail((f) => {
+        if (f) {
+          let v = fromDetail()
+          options.searches.push(v)
+          elem.table.appendChild(createRow(v))
+        }
+      })
+    })
+  }
+
   document.addEventListener('DOMContentLoaded', init)
   document.addEventListener('DOMContentLoaded', restoreOptions)
+  document.addEventListener('DOMContentLoaded', restoreConf)
 })()
