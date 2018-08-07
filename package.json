@@ -4,7 +4,7 @@
   "description": "Search extender for omnibox and context menu",
   "main": "gulpfile.js",
   "devDependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-pug": "^3.3.0",
     "gulp-rename": "^1.2.2",
     "pug": "^2.0.1"
