@@ -166,6 +166,7 @@
           let newV = fromDetail()
           options.searches.splice(options.searches.findIndex(vv => vv[0] === v[0]), 1, newV)
           elem.table.replaceChild(createRow(newV), tr)
+          elem.dirtyAlert.textContent = 'Change(s) may not be saved'
         }
       })
     })
@@ -175,6 +176,7 @@
       cb.setAttribute('type', 'checkbox')
       if (v[1] & j) cb.checked = true
       cb.disabled = true
+      elem.dirtyAlert.textContent = 'Change(s) may not be saved'
     }
     tr.appendChild(document.createElement('td')).innerText = v[2]
     tr.appendChild(document.createElement('td')).innerText = v[3]
@@ -193,6 +195,7 @@
       if (f) {
         options.searches.splice(options.searches.findIndex(vv => vv[0] === v[0]), 1)
         elem['row' + v[0]].remove()
+        elem.dirtyAlert.textContent = 'Change(s) may not be saved'
       }
     }))
     return tr
@@ -209,6 +212,7 @@
           let v = fromDetail()
           options.searches.push(v)
           elem.table.appendChild(createRow(v))
+          elem.dirtyAlert.textContent = 'Change(s) may not be saved'
         }
       })
     })
@@ -221,6 +225,7 @@
           } else {
             options.searches.push(v[0])
             elem.table.appendChild(createRow(v[0]))
+            elem.dirtyAlert.textContent = 'Change(s) may not be saved'
           }
         }
       })
@@ -274,6 +279,7 @@
       // As of Chrome 65, the following bug blocks download from chrome extension popups
       // https://bugs.chromium.org/p/chromium/issues/detail?id=821219
       elem.export.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(makeExports(options.searches))
+      elem.dirtyAlert.textContent = ''
     })
   }
 
@@ -311,19 +317,29 @@
   }
 
   let saveOptions = () => {
-    browser.storage.sync.set(options, () => setStatus(browser.runtime.lastError ? browser.runtime.lastError.message : 'saved'))
+    browser.storage.sync.set(options, () => {
+      if (browser.runtime.lastError) {
+        setStatus(browser.runtime.lastError.message)
+      } else {
+        setStatus('saved')
+        elem.dirtyAlert.textContent = ''
+      }
+    })
   }
 
   let restoreConf = () => {
     browser.runtime.sendMessage({ command: 'queryOptionConf' }, v => {
-      setDetailNew(v)
-      showDetail((f) => {
-        if (f) {
-          let v = fromDetail()
-          options.searches.push(v)
-          elem.table.appendChild(createRow(v))
-        }
-      })
+      if (v !== null) {
+        setDetailNew(v)
+        showDetail((f) => {
+          if (f) {
+            let v = fromDetail()
+            options.searches.push(v)
+            elem.table.appendChild(createRow(v))
+            elem.dirtyAlert.textContent = 'Change(s) may not be saved'
+          }
+        })
+      }
     })
   }
 

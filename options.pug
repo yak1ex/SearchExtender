@@ -25,6 +25,10 @@ html
       #import {
         opacity: 0;
       }
+      #dirtyAlert {
+        font-weight: bold;
+        color: #ff0000;
+      }
   body
     a#export(download='SearchExtender.conf.json') export
     |
@@ -34,6 +38,8 @@ html
     br
     input#new(type='button',value='New...')
     input#newFromText(type='button',value='New from text...')
+    input#save(type='button',value='Save')
+    span#dirtyAlert
     table#table
       tr
         th Edit
@@ -49,7 +55,6 @@ html
         th POST
         th Del
     #status
-    input#save(type='button',value='Save')
     dialog#detail
       h3#heading
       hr

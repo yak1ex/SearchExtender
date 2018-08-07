@@ -42,7 +42,7 @@
     let conf = []
     let confIdxFromName = {}
     let confIdxFromKey = {}
-    let optionConf;
+    let optionConf = null;
 
     function base64urlEncode (str) {
       let dat = str.split('').map(x => x.charCodeAt(0)).reduce((acc, cur) => {
@@ -279,7 +279,7 @@
           break
         case 'queryOptionConf':
           let conf = optionConf
-          optionConf = undefined
+          optionConf = null
           sendResponse(conf)
           break
       }
