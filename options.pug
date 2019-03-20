@@ -13,8 +13,52 @@ html
       #status {
         height: 1.5em;
       }
+      th {
+      }
       dialog h3 {
         margin: 0;
+      }
+      th {
+        background-image: linear-gradient(rgb(200, 200, 255), rgb(200, 200, 255) 38%, rgb(180, 180, 255));
+        box-shadow: rgba(0, 0, 0, 0.08) 0px 1px 0px, rgba(255, 255, 255, 0.75) 0px 1px 2px inset;
+        text-shadow: rgb(240, 240, 240) 0px 1px 0px;
+      }
+      td {
+        background-color: rgb(240, 240, 240);
+      }
+      td.checkbox {
+        text-align: center;
+      }
+      #controlhead {
+        display: flex;
+      }
+      .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: default;
+        font-family: inherit;
+        font-size: inherit;
+        padding: 0.1em 0.5em;
+        margin: 1px;
+        border: solid 2px;
+        border-radius: 5px;
+        border-color: #8080ff;
+        box-sizing: content-box;
+        color: black;
+        text-decoration: none;
+        min-height: 2em;
+        min-width: 4em;
+        background-image: linear-gradient(rgb(237, 237, 237), rgb(237, 237, 237) 38%, rgb(222, 222, 222));
+        box-shadow: rgba(0, 0, 0, 0.08) 0px 1px 0px, rgba(255, 255, 255, 0.75) 0px 1px 2px inset;
+        text-shadow: rgb(240, 240, 240) 0px 1px 0px;
+        border-color: rgba(0, 0, 0, 0.25);
+      }
+      .btn:hover {
+        /*background-color: #ccccff;*/
+        background-image: linear-gradient(rgb(240, 240, 240), rgb(240, 240, 240) 38%, rgb(224, 224, 224));
+        box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 0px, rgba(255, 255, 255, 0.95) 0px 1px 2px inset;
+        border-color: rgba(0, 0, 0, 0.3);
       }
       label[for="query"] {
         vertical-align: top;
@@ -23,23 +67,21 @@ html
         margin-bottom: 1em;
       }
       #import {
-        opacity: 0;
+        display: none;
       }
       #dirtyAlert {
         font-weight: bold;
         color: #ff0000;
       }
   body
-    a#export(download='SearchExtender.conf.json') export
-    |
-    |
-    label(for='import'): a import...
-    input#import(type='file')
-    br
-    input#new(type='button',value='New...')
-    input#newFromText(type='button',value='New from text...')
-    input#save(type='button',value='Save')
-    span#dirtyAlert
+    div#controlhead
+      a.btn#export(download='SearchExtender.conf.json') Export...
+      label(for='import'): a.btn Import...
+      input.btn#import(type='file')
+      input.btn#new(type='button',value='New...')
+      input.btn#newFromText(type='button',value='New from text...')
+      input.btn#save(type='button',value='Save')
+      span#dirtyAlert
     table#table
       tr
         th Edit

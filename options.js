@@ -157,6 +157,7 @@
     let tr = document.createElement('tr')
     tr.id = 'row' + v[0]
     let editButton = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
+    editButton.setAttribute('class', 'btn')
     editButton.setAttribute('type', 'button')
     editButton.setAttribute('value', 'Edit...')
     editButton.addEventListener('click', () => {
@@ -173,6 +174,7 @@
     tr.appendChild(document.createElement('td')).innerText = v[0]
     for (let j of targetVal) {
       let cb = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
+      cb.parentElement.setAttribute('class', 'checkbox')
       cb.setAttribute('type', 'checkbox')
       if (v[1] & j) cb.checked = true
       cb.disabled = true
@@ -181,14 +183,17 @@
     tr.appendChild(document.createElement('td')).innerText = v[2]
     tr.appendChild(document.createElement('td')).innerText = v[3]
     let cbCurtab = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
+    cbCurtab.parentElement.setAttribute('class', 'checkbox')
     cbCurtab.setAttribute('type', 'checkbox')
     if (v[4]) cbCurtab.checked = true
     cbCurtab.disabled = true
     let cbPost = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
+    cbPost.parentElement.setAttribute('class', 'checkbox')
     cbPost.setAttribute('type', 'checkbox')
     if (v[5]) cbPost.checked = true
     cbPost.disabled = true
     let delButton = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
+    delButton.setAttribute('class', 'btn')
     delButton.setAttribute('type', 'button')
     delButton.setAttribute('value', 'Del...')
     delButton.addEventListener('click', () => myConfirm(`Delete ${v[0]}?`, (f) => {
