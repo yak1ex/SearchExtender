@@ -14,6 +14,6 @@
     "page": "options.html",
     "chrome_style": true
   },
-  "permissions": [ "contextMenus", "storage" ],
-  "optional_permissions": [ "activeTab", "clipboardRead" ]
+  "permissions": [ "contextMenus", "storage", "activeTab" ],
+  "optional_permissions": [ "clipboardRead" ]
 }

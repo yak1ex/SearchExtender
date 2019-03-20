@@ -113,13 +113,7 @@
       return new Promise((resolve, reject) => {
         switch (disposition) {
           case 'currentTab':
-            browser.permissions.request({ permissions: ['activeTab'] }, (granted) => {
-              if (granted) {
-                browser.tabs.update({ url }, tab => resolve(tab))
-              } else {
-                browser.tabs.create({ url }, tab => resolve(tab))
-              }
-            })
+            browser.tabs.update({ url }, tab => resolve(tab))
             break
           case 'newForegroundTab':
             browser.tabs.create({ url }, tab => resolve(tab))
@@ -243,19 +237,8 @@
       if (info.menuItemId === CONF_KEY) {
         showOption()
       } else if (info.menuItemId === EXTRACT_KEY) {
-        const handler = (granted) => {
-          if (granted) {
-            // Invoked in contextMenu, so active tab in active frame assumed
-            // browser.tabs.executeScript(tab.id, { frameId: info.frameId, file: 'extract.js' })
-            browser.tabs.executeScript({ file: 'multiua.js' })
-            browser.tabs.executeScript({ file: 'extract.js' })
-          }
-        }
-        if (browser.isFirefox) {
-          browser.permissions.request({ permissions: ['activeTab'] }).then(handler).catch(e => console.log(e.message))
-        } else {
-          browser.permissions.request({ permissions: ['activeTab'] }, handler)
-        }
+        browser.tabs.executeScript({ file: 'multiua.js' })
+        browser.tabs.executeScript({ file: 'extract.js' })
       } else {
         const spec = conf[confIdxFromName[info.menuItemId]]
         jumpTo(spec[IDX_URL], spec[IDX_CURTAB] ? 'currentTab' : 'newForegroundTab', info, spec[IDX_ISPOST])
