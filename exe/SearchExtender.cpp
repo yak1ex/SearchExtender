@@ -209,12 +209,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpszCmdLine, int 
 	while(!fFound && *lpszCmdLine) {
 		switch(*lpszCmdLine) {
 		case ':':
+			nSlash = 0;
 			fColon = true;
 			break;
 		case '/':
-			if(fColon) ++nSlash;
+			if(fColon || nSlash > 0) ++nSlash;
 			if(nSlash == 2) fFound = true;
+			fColon = false;
 			break;
+		default:
+			fColon = false;
+			nSlash = 0;
 		}
 		++lpszCmdLine;
 	}
