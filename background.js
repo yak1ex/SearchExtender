@@ -128,6 +128,7 @@
     function jumpTo (specUrl, disposition, info, isPost) {
       return new Promise((resolve, reject) => {
         if (specUrl.indexOf(ARG_CLIP) !== -1) {
+          // BUG: permissions.request MUST move to outside of Promise
           browser.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
             if (granted) {
               const ta = document.createElement('textarea')
@@ -237,8 +238,10 @@
       if (info.menuItemId === CONF_KEY) {
         showOption()
       } else if (info.menuItemId === EXTRACT_KEY) {
-        browser.tabs.executeScript({ file: 'multiua.js' })
-        browser.tabs.executeScript({ file: 'extract.js' })
+        // Invoked in contextMenu, so active tab in active frame assumed
+        // browser.tabs.executeScript(tab.id, { frameId: info.frameId, file:'extract.js' })
+        browser.tabs.executeScript({ file: 'multiua.js' }, () =>{ if(browser.runtime.lastError) console.log('multiua.js:' + browser.runtime.lastError.message) })
+        browser.tabs.executeScript({ file: 'extract.js' }, () =>{ if(browser.runtime.lastError) console.log('extract.js:' + browser.runtime.lastError.message) })
       } else {
         const spec = conf[confIdxFromName[info.menuItemId]]
         jumpTo(spec[IDX_URL], spec[IDX_CURTAB] ? 'currentTab' : 'newForegroundTab', info, spec[IDX_ISPOST])
