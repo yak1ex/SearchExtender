@@ -1,8 +1,11 @@
 mixin labeledinput(type, name)
-  label(for=name)= name
+  label(for=name,id='label_'+name)= name+':'
   input(type=type,name=name,id=name)
+mixin labeledcb(type, name)
+  input.checkbox(type=type,name=name,id=name)
+  label.checkbox(for=name,id='label_'+name)= name
 mixin labeledarea(name)
-  label(for=name)= name
+  label(for=name,id='label_'+name)= name+':'
   textarea(name=name,id=name)&attributes(attributes)
 doctype html
 html
@@ -30,6 +33,9 @@ html
         text-align: center;
       }
       #controlhead {
+        display: flex;
+      }
+      .box {
         display: flex;
       }
       .btn {
@@ -60,6 +66,9 @@ html
         box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 0px, rgba(255, 255, 255, 0.95) 0px 1px 2px inset;
         border-color: rgba(0, 0, 0, 0.3);
       }
+      .checkbox {
+        cursor: pointer;
+      }
       label[for="query"] {
         vertical-align: top;
       }
@@ -72,6 +81,23 @@ html
       #dirtyAlert {
         font-weight: bold;
         color: #ff0000;
+      }
+      #detail_dialog_box {
+        display: grid;
+        align-items: center;
+        width: min-content;
+        grid-template-columns: auto repeat(5, auto 8ch);
+      }
+      #detail_dialog_box label, #detail_dialog_box span {
+        margin-right: 0.5em;
+        font-weight: bold;
+      }
+      #detail_dialog_box input[type="checkbox"] + label {
+        margin-right: 0;
+        font-weight: inherit;
+      }
+      #name, #key, #query {
+        grid-column: span 10;
       }
   body
     div#controlhead
@@ -100,41 +126,42 @@ html
     dialog#detail
       h3#heading
       hr
-      form(method='dialog')
-        +labeledinput('text', 'name')
-        +labeledinput('checkbox', 'omnibox')
-        +labeledinput('checkbox', 'page')
-        +labeledinput('checkbox', 'selection')
-        +labeledinput('checkbox', 'link')
-        +labeledinput('checkbox', 'image')
-        br
-        +labeledinput('text', 'key')
-        br
-        +labeledarea('query')(rows='5',cols='80')
-        br
-        +labeledinput('checkbox', 'curtab')
-        +labeledinput('checkbox', 'post')
-        br
-        input#update(type='submit',value='')
-        input#cancel(type='reset',value='Cancel')
+      form(id='detail_dialog',method='dialog')
+        div#detail_dialog_box
+          +labeledinput('text', 'name')
+          span#target target:
+          +labeledcb('checkbox', 'omnibox')
+          +labeledcb('checkbox', 'page')
+          +labeledcb('checkbox', 'selection')
+          +labeledcb('checkbox', 'link')
+          +labeledcb('checkbox', 'image')
+          +labeledinput('text', 'key')
+          +labeledarea('query')(rows='5',cols='80')
+          span#option option:
+          +labeledcb('checkbox', 'curtab')
+          +labeledcb('checkbox', 'post')
+        div.box
+          input.btn#update(type='submit',value='')
+          input.btn#cancel(type='reset',value='Cancel')
     dialog#fromText
       h3 New from text
       hr
       form(method='dialog')
         textarea#entry(rows='10',cols='80')
         br
-        input#confirmFromText(type='submit',value='Add')
-        input#cancelFromText(type='reset',value='Cancel')
+        div.box
+          input.btn#confirmFromText(type='submit',value='Add')
+          input.btn#cancelFromText(type='reset',value='Cancel')
     dialog#confirm
       h3 Confirmation
       hr
       #confirmMessage
-      form(method='dialog')
-        input#confirmConfirm(type='submit',value='Confirm')
-        input#cancelConfirm(type='reset',value='Cancel')
+      form.box(method='dialog')
+        input.btn#confirmConfirm(type='submit',value='Confirm')
+        input.btn#cancelConfirm(type='reset',value='Cancel')
     dialog#alert
       h3#alertTitle
-      input#alertConfirm(type='submit',value='OK')
+      input.btn#alertConfirm(type='submit',value='OK')
     if !chrome
       script(src='dialog-polyfill.js')
     script(src='multiua.js')
