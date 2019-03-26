@@ -1,4 +1,4 @@
-(function () {
+(function (g) {
   'use strict'
 
   /* global browser dialogPolyfill XMLHttpRequest */
@@ -207,7 +207,7 @@
   }
 
   let init = () => {
-    if (!browser.isChrome) {
+    if (!g.isChrome) {
       [].slice.call(document.querySelectorAll('dialog')).forEach(x => dialogPolyfill.registerDialog(x))
     }
     elem.new.addEventListener('click', () => {
@@ -274,7 +274,7 @@
   }
 
   let restoreOptions = () => {
-    browser.storage.sync.get('searches', function (res) {
+    g.browser.storage.sync.get('searches', function (res) {
       options = res
       options.init = true
       for (let i = 0; i < options.searches.length; ++i) {
@@ -307,7 +307,7 @@
         if (searches instanceof Error) {
           myAlert('Invalid configuration', searches.message)
         } else {
-          browser.storage.sync.set({ searches }, () => {
+          g.browser.storage.sync.set({ searches }, () => {
             setStatus('imported')
             const trs = [].slice.call(elem.table.children, 1)
             for (let tr of trs) {
@@ -322,9 +322,9 @@
   }
 
   let saveOptions = () => {
-    browser.storage.sync.set(options, () => {
-      if (browser.runtime.lastError) {
-        setStatus(browser.runtime.lastError.message)
+    g.browser.storage.sync.set(options, () => {
+      if (g.browser.runtime.lastError) {
+        setStatus(g.browser.runtime.lastError.message)
       } else {
         setStatus('saved')
         elem.dirtyAlert.textContent = ''
@@ -333,7 +333,7 @@
   }
 
   let restoreConf = () => {
-    browser.runtime.sendMessage({ command: 'queryOptionConf' }, v => {
+    g.browser.runtime.sendMessage({ command: 'queryOptionConf' }, v => {
       if (v !== null) {
         setDetailNew(v)
         showDetail((f) => {
@@ -351,4 +351,4 @@
   document.addEventListener('DOMContentLoaded', init)
   document.addEventListener('DOMContentLoaded', restoreOptions)
   document.addEventListener('DOMContentLoaded', restoreConf)
-})()
+})(g)

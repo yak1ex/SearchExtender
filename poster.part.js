@@ -1,11 +1,11 @@
-(function () {
+(function (g) {
   /* global browser */
   'use strict'
 
   // from https://stackoverflow.com/a/23687543 with style change and multiple value support
   let onMessageHandler = message => {
     // Ensure it is run only once, as we will try to message twice
-    browser.runtime.onMessage.removeListener(onMessageHandler)
+    g.browser.runtime.onMessage.removeListener(onMessageHandler)
 
     // code from https://stackoverflow.com/a/7404033/934239
     let form = document.createElement('form')
@@ -21,9 +21,12 @@
         form.appendChild(hiddenField)
       }
     }
+    if('encoding' in message) {
+      form.setAttribute('accept-charset', message.encoding)
+    }
     document.body.appendChild(form)
     form.submit()
   }
 
-  browser.runtime.onMessage.addListener(onMessageHandler)
-})()
+  g.browser.runtime.onMessage.addListener(onMessageHandler)
+})(g)

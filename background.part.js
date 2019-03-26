@@ -1,7 +1,7 @@
-(function () {
+(function (g) {
   'use strict'
 
-  /* global browser URL */
+  /* global URL */
   // TODO: charset conversion
 
   const defConf = {
@@ -11,9 +11,9 @@
       ['Wikipedia(EN)', 5, 'we', 'https://en.wikipedia.org/wiki/%s', false, false]
     ]
   }
-  browser.storage.sync.get({ searches: [], init: false }, (res) => {
+  g.browser.storage.sync.get({ searches: [], init: false }, (res) => {
     if (!res.init) {
-      browser.storage.sync.set(defConf)
+      g.browser.storage.sync.set(defConf)
     }
 
     // TODO: extract contant table for, at least, config index
@@ -78,15 +78,15 @@
       return function (tab) {
         let handler = function (tabId, changeInfo) {
           if (tabId === tab.id && changeInfo.status === 'complete') {
-            browser.tabs.onUpdated.removeListener(handler)
-            browser.tabs.sendMessage(tabId, { url: url, data: data })
+            g.browser.tabs.onUpdated.removeListener(handler)
+            g.browser.tabs.sendMessage(tabId, { url: url, data: data })
           }
         }
 
         // in case we're faster than page load (usually):
-        browser.tabs.onUpdated.addListener(handler)
+        g.browser.tabs.onUpdated.addListener(handler)
         // just in case we're too late with the listener:
-        browser.tabs.sendMessage(tab.id, { url: url, data: data })
+        g.browser.tabs.sendMessage(tab.id, { url: url, data: data })
       }
     }
 
@@ -113,13 +113,13 @@
       return new Promise((resolve, reject) => {
         switch (disposition) {
           case 'currentTab':
-            browser.tabs.update({ url }, tab => resolve(tab))
+            g.browser.tabs.update({ url }, tab => resolve(tab))
             break
           case 'newForegroundTab':
-            browser.tabs.create({ url }, tab => resolve(tab))
+            g.browser.tabs.create({ url }, tab => resolve(tab))
             break
           case 'newBackgroundTab':
-            browser.tabs.create({ url, active: false }, tab => resolve(tab))
+            g.browser.tabs.create({ url, active: false }, tab => resolve(tab))
             break
         }
       })
@@ -129,7 +129,7 @@
       return new Promise((resolve, reject) => {
         if (specUrl.indexOf(ARG_CLIP) !== -1) {
           // BUG: permissions.request MUST move to outside of Promise
-          browser.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
+          g.browser.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
             if (granted) {
               const ta = document.createElement('textarea')
               document.body.appendChild(ta)
@@ -144,7 +144,7 @@
       }).then(clip => {
         const url = makeURL(specUrl, info, clip)
         if (isPost) {
-          return setupTab(browser.runtime.getURL('poster.html'), disposition).then(makePostHandler(url))
+          return setupTab(g.browser.runtime.getURL('poster.html'), disposition).then(makePostHandler(url))
         } else {
           return setupTab(url, disposition)
         }
@@ -152,9 +152,9 @@
     }
 
     const defSuggest = { description: 'Type search key and keyword, like "g googling"' }
-    browser.omnibox.setDefaultSuggestion(defSuggest)
+    g.browser.omnibox.setDefaultSuggestion(defSuggest)
 
-    browser.omnibox.onInputChanged.addListener((text, suggest) => {
+    g.browser.omnibox.onInputChanged.addListener((text, suggest) => {
       const wsPos = text.search(/\s/)
       const key = text.slice(0, wsPos !== -1 ? wsPos : text.length)
       let suggests = []
@@ -162,7 +162,7 @@
       conf_.push([CONF_NAME, 0, CONF_KEY, ''])
       for (let c of conf_) {
         if ((c[IDX_TARGET] & TARGET_OMNIBOX) && c[IDX_KEY].indexOf(key) !== -1) {
-          if (browser.isFirefox) {
+          if (g.isFirefox) {
             suggests.push({ content: c[IDX_KEY], description: `${c[IDX_KEY]} ${c[IDX_NAME]}` })
           } else {
             suggests.push({ content: c[IDX_KEY], description: `<match>${c[IDX_KEY]}</match> <dim>${c[IDX_NAME]}</dim>` })
@@ -170,23 +170,23 @@
         }
       }
       if (suggests.length === 1) {
-        browser.omnibox.setDefaultSuggestion({ description: suggests[0].description })
+        g.browser.omnibox.setDefaultSuggestion({ description: suggests[0].description })
       } else {
-        browser.omnibox.setDefaultSuggestion(defSuggest)
+        g.browser.omnibox.setDefaultSuggestion(defSuggest)
         suggest(suggests)
       }
     })
 
     function showOption () {
-      if (browser.runtime.openOptionsPage) {
-        browser.runtime.openOptionsPage()
+      if (g.browser.runtime.openOptionsPage) {
+        g.browser.runtime.openOptionsPage()
       } else {
-        window.open(browser.runtime.getURL('options.html'))
+        window.open(g.browser.runtime.getURL('options.html'))
       }
     }
 
-    browser.omnibox.onInputEntered.addListener((text, disposition) => {
-      browser.omnibox.setDefaultSuggestion(defSuggest)
+    g.browser.omnibox.onInputEntered.addListener((text, disposition) => {
+      g.browser.omnibox.setDefaultSuggestion(defSuggest)
       const wsPos = (x => x === -1 ? text.length : x)(text.search(/\s/))
       const key = text.slice(0, wsPos)
       const selectionText = text.slice(wsPos).trim()
@@ -200,61 +200,60 @@
 
     const contextsSpec = { [TARGET_PAGE]: 'page', [TARGET_SELECTION]: 'selection', [TARGET_LINK]: 'link', [TARGET_IMAGE]: 'image' }
     function setupMenu () {
-      browser.storage.sync.get('searches', (newconf) => {
+      g.browser.storage.sync.get('searches', (newconf) => {
         conf = newconf.searches
         confIdxFromName = {}
         confIdxFromKey = {}
-        browser.contextMenus.create({title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image', 'editable']}, () => { if (browser.runtime.lastError) console.log(browser.runtime.lastError.message) })
+        g.browser.contextMenus.create({title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image', 'editable']}, () => { if (g.browser.runtime.lastError) console.log(g.browser.runtime.lastError.message) })
         for (let i = 0; i < conf.length; ++i) {
           const contexts = Object.keys(contextsSpec).filter(x => conf[i][IDX_TARGET] & x).map(x => contextsSpec[x])
           if (contexts.length !== 0) {
-            browser.contextMenus.create({
+            g.browser.contextMenus.create({
               title: conf[i][IDX_NAME],
               id: conf[i][IDX_NAME],
               contexts,
               parentId: 'root'
-            }, () => { if (browser.runtime.lastError) console.log(browser.runtime.lastError.message) })
+            }, () => { if (g.browser.runtime.lastError) console.log(g.browser.runtime.lastError.message) })
           }
           confIdxFromName[conf[i][IDX_NAME]] = i
           confIdxFromKey[conf[i][IDX_KEY]] = i
         }
-        browser.contextMenus.create({
+        g.browser.contextMenus.create({
           title: CONF_NAME,
           id: CONF_KEY,
           contexts: ['page', 'selection', 'link', 'image'],
           parentId: 'root'
-        }, () => { if (browser.runtime.lastError) console.log(browser.runtime.lastError.message) })
-        browser.contextMenus.create({
+        }, () => { if (g.browser.runtime.lastError) console.log(g.browser.runtime.lastError.message) })
+        g.browser.contextMenus.create({
           title: EXTRACT_NAME,
           id: EXTRACT_KEY,
           contexts: ['editable'],
           parentId: 'root'
-        }, () => { if (browser.runtime.lastError) console.log(browser.runtime.lastError.message) })
+        }, () => { if (g.browser.runtime.lastError) console.log(g.browser.runtime.lastError.message) })
       })
     }
 
-    browser.contextMenus.onClicked.addListener((info, tab) => {
+    g.browser.contextMenus.onClicked.addListener((info, tab) => {
       console.log(info)
       if (info.menuItemId === CONF_KEY) {
         showOption()
       } else if (info.menuItemId === EXTRACT_KEY) {
         // Invoked in contextMenu, so active tab in active frame assumed
-        // browser.tabs.executeScript(tab.id, { frameId: info.frameId, file:'extract.js' })
-        browser.tabs.executeScript({ file: 'multiua.js' }, () =>{ if(browser.runtime.lastError) console.log('multiua.js:' + browser.runtime.lastError.message) })
-        browser.tabs.executeScript({ file: 'extract.js' }, () =>{ if(browser.runtime.lastError) console.log('extract.js:' + browser.runtime.lastError.message) })
+        // g.browser.tabs.executeScript(tab.id, { frameId: info.frameId, file:'extract.js' })
+        g.browser.tabs.executeScript({ file: 'extract.js' }, () =>{ if(g.browser.runtime.lastError) console.log('extract.js:' + g.browser.runtime.lastError.message) })
       } else {
         const spec = conf[confIdxFromName[info.menuItemId]]
         jumpTo(spec[IDX_URL], spec[IDX_CURTAB] ? 'currentTab' : 'newForegroundTab', info, spec[IDX_ISPOST])
       }
     })
 
-    browser.storage.onChanged.addListener((changes, area) => {
+    g.browser.storage.onChanged.addListener((changes, area) => {
       if (area === 'sync') {
-        if ('searches' in changes) browser.contextMenus.removeAll(() => setupMenu())
+        if ('searches' in changes) g.browser.contextMenus.removeAll(() => setupMenu())
       }
     })
 
-    browser.runtime.onMessage.addListener((dat, sender, sendResponse) => {
+    g.browser.runtime.onMessage.addListener((dat, sender, sendResponse) => {
       switch (dat.command) {
         case 'showOption':
           showOption()
@@ -273,4 +272,4 @@
 
     setupMenu()
   })
-})()
+})(g)

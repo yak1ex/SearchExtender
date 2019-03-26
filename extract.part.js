@@ -1,5 +1,4 @@
-(function () {
-  /* global browser */
+(function (g) {
   if (document.activeElement.form) {
     const form = document.activeElement.form
     const name = document.activeElement.name
@@ -30,6 +29,6 @@
       post
     ]
 
-    browser.runtime.sendMessage({ command: 'showOptionWithConf', content: content })
+    g.browser.runtime.sendMessage({ command: 'showOptionWithConf', content: content })
   }
-})()
+})(g)
