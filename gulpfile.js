@@ -5,12 +5,14 @@ const concat = require('gulp-concat')
 const insert = require('gulp-insert')
 const merge = require('merge-stream')
 const mocha = require('gulp-mocha')
+const indent = require('gulp-indent')
 
 function concatjs(src, dest) {
   return gulp.src(src)
     .pipe(insert.prepend(';'))
     .pipe(concat(dest))
-    .pipe(insert.wrap('(function(){\nlet g = {}\n', '})()\n'))
+    .pipe(indent())
+    .pipe(insert.wrap('(function(){\n  let g = {}\n', '})()\n'))
 }
 
 function process (type) {
