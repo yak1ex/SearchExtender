@@ -14,10 +14,6 @@
     }
   })
 
-  const targetKeyVal = [['omnibox', 1], ['page', 2], ['selection', 4], ['link', 8], ['image', 16]]
-  const targetKey = targetKeyVal.map(x => x[0])
-  const targetVal = targetKeyVal.map(x => x[1])
-
   let myAlert = (title, message) => {
     elem.alertTitle.textContent = title
     elem.alertMessage.textContent = message
@@ -41,10 +37,10 @@
   }
 
   let checkValidity = (v, curname, curkey) => {
-    if (v[0] === '') return 'Empty name'
-    if (v[0] !== curname && options.searches.map(x => x[0]).indexOf(v[0]) !== -1) return `name: '${v[0]}' is already used`
-    if (v[2] !== '' && v[2] !== curkey && options.searches.map(x => x[2]).indexOf(v[2]) !== -1) return `key: '${v[2]}' is already used`
-    if (v[3] === '') return 'Empty query'
+    if (v.name === '') return 'Empty name'
+    if (v.name !== curname && options.searches.map(x => x.name).indexOf(v.name) !== -1) return `name: '${v.name}' is already used`
+    if (v.key !== '' && v.key !== curkey && options.searches.conf.map(x => x.key).indexOf(v.key) !== -1) return `key: '${v.key}' is already used`
+    if (v.url === '') return 'Empty query'
     return null
   }
 
@@ -77,7 +73,7 @@
     elem.name.value = ''
     elem.name.setAttribute('data-current', '')
     elem.omnibox.checked = false
-    targetKey.forEach(id => { elem[id].checked = false })
+    g.Conf.TARGET_KEYS.forEach(id => { elem[id].checked = false })
     elem.key.value = ''
     elem.key.setAttribute('data-current', '')
     elem.query.value = ''
@@ -88,38 +84,38 @@
   let setDetail = v => {
     elem.update.value = 'Update'
     elem.heading.textContent = 'Edit search config'
-    elem.name.value = v[0]
+    elem.name.value = v.name
     elem.name.setAttribute('data-current', v[0])
-    targetKeyVal.forEach(vv => { elem[vv[0]].checked = ((v[1] & vv[1]) !== 0) })
-    elem.key.value = v[2]
-    elem.key.setAttribute('data-current', v[2])
-    elem.query.value = v[3]
-    elem.curtab.checked = v[4]
-    elem.post.checked = v[5]
+    g.Conf.TARGET_KEYS.forEach((key,idx) => { elem[key].checked = ((v.target & (1<<idx)) !== 0) })
+    elem.key.value = v.key
+    elem.key.setAttribute('data-current', v.key)
+    elem.query.value = v.url
+    elem.curtab.checked = v.curTab
+    elem.post.checked = v.isPost
   }
 
   let setDetailNew = v => {
     elem.update.value = 'Add'
     elem.heading.textContent = 'New search config'
-    elem.name.value = v[0]
+    elem.name.value = v.name
     elem.name.setAttribute('data-current', '')
-    targetKeyVal.forEach(vv => { elem[vv[0]].checked = ((v[1] & vv[1]) !== 0) })
+    g.Conf.TARGET_KEYS.forEach((key,idx) => { elem[key].checked = ((v.target & (1<<idx)) !== 0) })
     elem.key.value = ''
     elem.key.setAttribute('data-current', '')
-    elem.query.value = v[3]
-    elem.curtab.checked = v[4]
-    elem.post.checked = v[5]
+    elem.query.value = v.url
+    elem.curtab.checked = v.curTab
+    elem.post.checked = v.isPost
   }
 
   let fromDetail = () => {
-    return [
-      elem.name.value,
-      targetKeyVal.reduce((acc, vv) => acc + (elem[vv[0]].checked ? vv[1] : 0), 0),
-      elem.key.value,
-      elem.query.value,
-      elem.curtab.checked,
-      elem.post.checked
-    ]
+    return {
+      name: elem.name.value,
+      target: g.Conf.TARGET_KEYS.reduce((acc, key, idx) => acc + (elem[key].checked ? (1<<idx) : 0), 0),
+      key: elem.key.value,
+      url: elem.query.value,
+      curTab: elem.curtab.checked,
+      isPost: elem.post.checked
+    }
   }
 
   let showFromText = (cb) => {
@@ -155,7 +151,7 @@
 
   let createRow = v => {
     let tr = document.createElement('tr')
-    tr.id = 'row' + v[0]
+    tr.id = 'row' + v.name
     let editButton = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
     editButton.setAttribute('class', 'btn')
     editButton.setAttribute('type', 'button')
@@ -165,40 +161,40 @@
       showDetail(f => {
         if (f) {
           let newV = fromDetail()
-          options.searches.splice(options.searches.findIndex(vv => vv[0] === v[0]), 1, newV)
+          options.searches.replaceEntry(newV)
           elem.table.replaceChild(createRow(newV), tr)
           elem.dirtyAlert.textContent = 'Change(s) may not be saved'
         }
       })
     })
-    tr.appendChild(document.createElement('td')).innerText = v[0]
-    for (let j of targetVal) {
+    tr.appendChild(document.createElement('td')).innerText = v.name
+    for (let j of g.Conf.TARGET_KEYS.map((v,i) => 1<<i)) {
       let cb = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
       cb.parentElement.setAttribute('class', 'checkbox')
       cb.setAttribute('type', 'checkbox')
-      if (v[1] & j) cb.checked = true
+      if (v.target & j) cb.checked = true
       cb.disabled = true
       elem.dirtyAlert.textContent = 'Change(s) may not be saved'
     }
-    tr.appendChild(document.createElement('td')).innerText = v[2]
-    tr.appendChild(document.createElement('td')).innerText = v[3]
+    tr.appendChild(document.createElement('td')).innerText = v.key
+    tr.appendChild(document.createElement('td')).innerText = v.url
     let cbCurtab = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
     cbCurtab.parentElement.setAttribute('class', 'checkbox')
     cbCurtab.setAttribute('type', 'checkbox')
-    if (v[4]) cbCurtab.checked = true
+    if (v.curTab) cbCurtab.checked = true
     cbCurtab.disabled = true
     let cbPost = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
     cbPost.parentElement.setAttribute('class', 'checkbox')
     cbPost.setAttribute('type', 'checkbox')
-    if (v[5]) cbPost.checked = true
+    if (v.isPost) cbPost.checked = true
     cbPost.disabled = true
     let delButton = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
     delButton.setAttribute('class', 'btn')
     delButton.setAttribute('type', 'button')
     delButton.setAttribute('value', 'Del...')
-    delButton.addEventListener('click', () => myConfirm(`Delete ${v[0]}?`, (f) => {
+    delButton.addEventListener('click', () => myConfirm(`Delete ${v.name}?`, (f) => {
       if (f) {
-        options.searches.splice(options.searches.findIndex(vv => vv[0] === v[0]), 1)
+        options.searches.deleteEntry(v.name)
         elem['row' + v[0]].remove()
         elem.dirtyAlert.textContent = 'Change(s) may not be saved'
       }
@@ -215,7 +211,7 @@
       showDetail((f) => {
         if (f) {
           let v = fromDetail()
-          options.searches.push(v)
+          options.searches.addEntry(v)
           elem.table.appendChild(createRow(v))
           elem.dirtyAlert.textContent = 'Change(s) may not be saved'
         }
@@ -224,12 +220,12 @@
     elem.newFromText.addEventListener('click', () => {
       showFromText((f) => {
         if (f) {
-          const v = fromExports([JSON.parse(elem.entry.value)])
+          const v = g.Conf.fromExternal([JSON.parse(elem.entry.value)])
           if (v instanceof Error) {
             myAlert('Invalid configuration', v.message)
           } else {
-            options.searches.push(v[0])
-            elem.table.appendChild(createRow(v[0]))
+            options.searches.addEntry(v.conf[0])
+            elem.table.appendChild(createRow(v.conf[0]))
             elem.dirtyAlert.textContent = 'Change(s) may not be saved'
           }
         }
@@ -239,51 +235,15 @@
     elem.import.addEventListener('change', importOptions)
   }
 
-  let makeExports = (searches) => {
-    let result = []
-    for (let v of searches) {
-      let target = {}
-      for (let kv of targetKeyVal) {
-        if (v[1] & kv[1]) target[kv[0]] = true
-      }
-      result.push([v[0], target, v[2], v[3], v[4], v[5]])
-    }
-    return JSON.stringify(result, null, 2)
-  }
-
-  let fromExports = (searches) => {
-    let results = []
-    if (searches === null) return new Error('Invalid JSON')
-    if (!(searches instanceof Array)) return new Error('root is not an array')
-    try {
-      searches.forEach((v, idx) => {
-        if (!(v instanceof Array) || v.length !== 6) throw new Error(`The ${idx + 1}-th entry is not a 6-element array`)
-        if (typeof v[1] !== 'object') throw new Error(`The 2nd element of ${idx + 1}-th entry is not an object`)
-        const unknown = Object.keys(v[1]).filter(x => targetKey.indexOf(x) === -1)
-        if (unknown.length !== 0) throw new Error(`unknown key ${unknown.join(', ')} is used in ${idx + 1}-th entry`)
-        let bits = 0
-        for (let kv of targetKeyVal) {
-          if (kv[0] in v[1]) bits += kv[1]
-        }
-        results.push([v[0], bits, v[2], v[3], v[4], v[5]])
-      })
-    } catch (e) {
-      return e
-    }
-    return results
-  }
-
   let restoreOptions = () => {
     g.browser.storage.sync.get('searches', function (res) {
-      options = res
+      options = {}
+      options.searches = g.Conf.fromStorage(res)
       options.init = true
-      for (let i = 0; i < options.searches.length; ++i) {
-        let v = options.searches[i]
-        elem.table.appendChild(createRow(v))
-      }
+      options.searches.conf.forEach(v => elem.table.appendChild(createRow(v)))
       // As of Chrome 65, the following bug blocks download from chrome extension popups
       // https://bugs.chromium.org/p/chromium/issues/detail?id=821219
-      elem.export.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(makeExports(options.searches))
+      elem.export.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(options.searches.toExternal(), null, 2))
       elem.dirtyAlert.textContent = ''
     })
   }
@@ -303,11 +263,11 @@
     xhr.responseType = 'json'
     xhr.addEventListener('readystatechange', () => {
       if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-        const searches = fromExports(xhr.response)
+        const searches = g.Conf.fromExternal(xhr.response)
         if (searches instanceof Error) {
           myAlert('Invalid configuration', searches.message)
         } else {
-          g.browser.storage.sync.set({ searches }, () => {
+          g.browser.storage.sync.set({ searches: searches.toStorage() }, () => {
             setStatus('imported')
             const trs = [].slice.call(elem.table.children, 1)
             for (let tr of trs) {
@@ -322,7 +282,8 @@
   }
 
   let saveOptions = () => {
-    g.browser.storage.sync.set(options, () => {
+    let options_ = Object.assign({}, options, options.searches.toStorage())
+    g.browser.storage.sync.set(options_, () => {
       if (g.browser.runtime.lastError) {
         setStatus(g.browser.runtime.lastError.message)
       } else {
@@ -335,11 +296,12 @@
   let restoreConf = () => {
     g.browser.runtime.sendMessage({ command: 'queryOptionConf' }, v => {
       if (v !== null) {
+        v = g.Conf.fromStorage({searches:[v]}).conf[0]
         setDetailNew(v)
         showDetail((f) => {
           if (f) {
             let v = fromDetail()
-            options.searches.push(v)
+            options.searches.addEntry(v)
             elem.table.appendChild(createRow(v))
             elem.dirtyAlert.textContent = 'Change(s) may not be saved'
           }

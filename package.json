@@ -4,12 +4,15 @@
   "description": "Search extender for omnibox and context menu",
   "main": "gulpfile.js",
   "devDependencies": {
+    "chai": "^4.2.0",
     "gulp": "^4.0.0",
     "gulp-concat": "^2.6.1",
     "gulp-insert": "^0.5.0",
+    "gulp-mocha": "^6.0.0",
     "gulp-pug": "^3.3.0",
     "gulp-rename": "^1.2.2",
     "merge-stream": "^1.0.1",
+    "mocha": "^6.0.2",
     "pug": "^2.0.1"
   },
   "scripts": {

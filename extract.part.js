@@ -20,8 +20,13 @@
     }
     const url = form.action + queryDelim + query.join('&')
 
+    let top = window.parent
+    while(top.parent != top) {
+      top = top.parent
+    }
+
     const content = [
-      document.title,
+      top.document.title,
       5,
       "",
       url,
