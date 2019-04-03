@@ -86,7 +86,7 @@
     elem.heading.textContent = 'Edit search config'
     elem.name.value = v.name
     elem.name.setAttribute('data-current', v[0])
-    g.Conf.TARGET_KEYS.forEach((key,idx) => { elem[key].checked = ((v.target & (1<<idx)) !== 0) })
+    g.Conf.TARGET_KEYS.forEach((key, idx) => { elem[key].checked = ((v.target & (1 << idx)) !== 0) })
     elem.key.value = v.key
     elem.key.setAttribute('data-current', v.key)
     elem.query.value = v.url
@@ -99,7 +99,7 @@
     elem.heading.textContent = 'New search config'
     elem.name.value = v.name
     elem.name.setAttribute('data-current', '')
-    g.Conf.TARGET_KEYS.forEach((key,idx) => { elem[key].checked = ((v.target & (1<<idx)) !== 0) })
+    g.Conf.TARGET_KEYS.forEach((key, idx) => { elem[key].checked = ((v.target & (1 << idx)) !== 0) })
     elem.key.value = ''
     elem.key.setAttribute('data-current', '')
     elem.query.value = v.url
@@ -110,7 +110,7 @@
   let fromDetail = () => {
     return {
       name: elem.name.value,
-      target: g.Conf.TARGET_KEYS.reduce((acc, key, idx) => acc + (elem[key].checked ? (1<<idx) : 0), 0),
+      target: g.Conf.TARGET_KEYS.reduce((acc, key, idx) => acc + (elem[key].checked ? (1 << idx) : 0), 0),
       key: elem.key.value,
       url: elem.query.value,
       curTab: elem.curtab.checked,
@@ -122,7 +122,7 @@
     let cbTrue, cbFalse
     let makeCb = (f) => (e) => {
       if (f) {
-        const v = fromExports([JSON.parse(elem.entry.value)])
+        const v = g.Conf.fromExternal([JSON.parse(elem.entry.value)])
         if (v instanceof Error) {
           e.preventDefault()
           myAlert('Invalid configuration', v.message)
@@ -168,7 +168,7 @@
       })
     })
     tr.appendChild(document.createElement('td')).innerText = v.name
-    for (let j of g.Conf.TARGET_KEYS.map((v,i) => 1<<i)) {
+    for (let j of g.Conf.TARGET_KEYS.map((v, i) => 1 << i)) {
       let cb = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
       cb.parentElement.setAttribute('class', 'checkbox')
       cb.setAttribute('type', 'checkbox')
@@ -296,7 +296,7 @@
   let restoreConf = () => {
     g.browser.runtime.sendMessage({ command: 'queryOptionConf' }, v => {
       if (v !== null) {
-        v = g.Conf.fromStorage({searches:[v]}).conf[0]
+        v = g.Conf.fromStorage({ searches: [v] }).conf[0]
         setDetailNew(v)
         showDetail((f) => {
           if (f) {

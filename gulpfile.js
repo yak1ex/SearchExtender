@@ -12,7 +12,7 @@ function concatjs(src, dest) {
     .pipe(insert.prepend(';'))
     .pipe(concat(dest))
     .pipe(indent())
-    .pipe(insert.wrap('(function(){\n  let g = {}\n', '})()\n'))
+    .pipe(insert.wrap('(function () {\n  let g = {}\n', '})()\n'))
 }
 
 function process (type) {

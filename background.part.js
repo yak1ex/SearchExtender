@@ -142,7 +142,7 @@
       const wsPos = text.search(/\s/)
       const key = text.slice(0, wsPos !== -1 ? wsPos : text.length)
       let suggests = []
-      if(CONF_KEY.indexOf(key) !== -1) {
+      if (CONF_KEY.indexOf(key) !== -1) {
         suggests.push(getSuggestion(CONF_KEY, CONF_NAME))
       }
       suggests = suggests.concat(conf.conf
@@ -180,7 +180,10 @@
     function setupMenu () {
       g.browser.storage.sync.get('searches', (newconf) => {
         conf = g.Conf.fromStorage(newconf)
-        g.browser.contextMenus.create({title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image', 'editable']}, () => { if (g.browser.runtime.lastError) console.log(g.browser.runtime.lastError.message) })
+        g.browser.contextMenus.create(
+          { title: 'SearchExtender', id: 'root', contexts: ['page', 'selection', 'link', 'image', 'editable'] },
+          () => { if (g.browser.runtime.lastError) console.log(g.browser.runtime.lastError.message) }
+        )
         conf.conf.filter(x => x.target).forEach(x =>
           g.browser.contextMenus.create({
             title: x.name,
@@ -210,7 +213,10 @@
       } else if (info.menuItemId === EXTRACT_KEY) {
         // Invoked in contextMenu, so active tab assumed
         // g.browser.tabs.executeScript(tab.id, { frameId: info.frameId, file:'extract.js' })
-        g.browser.tabs.executeScript({ frameId: info.frameId, file: 'extract.js' }, () =>{ if(g.browser.runtime.lastError) console.log('extract.js:' + g.browser.runtime.lastError.message) })
+        g.browser.tabs.executeScript(
+          { frameId: info.frameId, file: 'extract.js' },
+          () => { if (g.browser.runtime.lastError) console.log('extract.js:' + g.browser.runtime.lastError.message) }
+        )
       } else {
         const spec = conf.getFromName(info.menuItemId)
         jumpTo(spec.url, spec.curTab ? 'currentTab' : 'newForegroundTab', info, spec.isPost)

@@ -21,7 +21,7 @@
         form.appendChild(hiddenField)
       }
     }
-    if('encoding' in message) {
+    if ('encoding' in message) {
       form.setAttribute('accept-charset', message.encoding)
     }
     document.body.appendChild(form)
