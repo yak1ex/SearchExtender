@@ -161,6 +161,8 @@ html
         input.btn#cancelConfirm(type='reset',value='Cancel')
     dialog#alert
       h3#alertTitle
+      hr
+      #alertMessage
       input.btn#alertConfirm(type='submit',value='OK')
     if !chrome
       script(src='dialog-polyfill.js')

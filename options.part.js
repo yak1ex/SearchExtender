@@ -17,6 +17,11 @@
   let myAlert = (title, message) => {
     elem.alertTitle.textContent = title
     elem.alertMessage.textContent = message
+    let cb = () => {
+        elem.alertConfirm.removeEventListener('click', cb)
+        elem.alert.close()
+    }
+    elem.alertConfirm.addEventListener('click', cb)
     elem.alert.showModal()
   }
 
@@ -38,7 +43,7 @@
 
   let checkValidity = (v, curname, curkey) => {
     if (v.name === '') return 'Empty name'
-    if (v.name !== curname && options.searches.map(x => x.name).indexOf(v.name) !== -1) return `name: '${v.name}' is already used`
+    if (v.name !== curname && options.searches.conf.map(x => x.name).indexOf(v.name) !== -1) return `name: '${v.name}' is already used`
     if (v.key !== '' && v.key !== curkey && options.searches.conf.map(x => x.key).indexOf(v.key) !== -1) return `key: '${v.key}' is already used`
     if (v.url === '') return 'Empty query'
     return null
@@ -85,7 +90,7 @@
     elem.update.value = 'Update'
     elem.heading.textContent = 'Edit search config'
     elem.name.value = v.name
-    elem.name.setAttribute('data-current', v[0])
+    elem.name.setAttribute('data-current', v.name)
     g.Conf.TARGET_KEYS.forEach((key, idx) => { elem[key].checked = ((v.target & (1 << idx)) !== 0) })
     elem.key.value = v.key
     elem.key.setAttribute('data-current', v.key)
