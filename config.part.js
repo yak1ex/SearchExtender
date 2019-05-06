@@ -9,7 +9,7 @@
 
   g.Conf = {}
 
-  const idx = ['name', 'target', 'key', 'url', 'curTab', 'isPost']
+  const idx = ['name', 'target', 'key', 'url', 'curTab', 'isPost', 'charset']
   idx.forEach((v, i) => defineConst(g.Conf, 'IDX_' + v.toUpperCase(), i))
 
   const targets = ['omnibox', 'page', 'selection', 'link', 'image']
@@ -26,9 +26,9 @@
 
   defineConst(g.Conf, 'defConfStorage', {
     searches: [
-      ['Google', 5, 'g', 'http://www.google.co.jp/search?q=%s', false, false],
-      ['Wikipedia(JP)', 5, 'wj', 'https://ja.wikipedia.org/wiki/%s', false, false],
-      ['Wikipedia(EN)', 5, 'we', 'https://en.wikipedia.org/wiki/%s', false, false]
+      ['Google', 5, 'g', 'http://www.google.co.jp/search?q=%s', false, false, ''],
+      ['Wikipedia(JP)', 5, 'wj', 'https://ja.wikipedia.org/wiki/%s', false, false, ''],
+      ['Wikipedia(EN)', 5, 'we', 'https://en.wikipedia.org/wiki/%s', false, false, '']
     ]
   })
 

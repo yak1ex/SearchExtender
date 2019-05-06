@@ -84,6 +84,7 @@
     elem.query.value = ''
     elem.curtab.checked = false
     elem.post.checked = false
+    elem.charset.value = ''
   }
 
   let setDetail = v => {
@@ -97,6 +98,7 @@
     elem.query.value = v.url
     elem.curtab.checked = v.curTab
     elem.post.checked = v.isPost
+    elem.charset.value = v.charset
   }
 
   let setDetailNew = v => {
@@ -110,6 +112,7 @@
     elem.query.value = v.url
     elem.curtab.checked = v.curTab
     elem.post.checked = v.isPost
+    elem.charset.value = v.charset
   }
 
   let fromDetail = () => {
@@ -119,7 +122,8 @@
       key: elem.key.value,
       url: elem.query.value,
       curTab: elem.curtab.checked,
-      isPost: elem.post.checked
+      isPost: elem.post.checked,
+      charset: elem.charset.value
     }
   }
 
@@ -193,6 +197,8 @@
     cbPost.setAttribute('type', 'checkbox')
     if (v.isPost) cbPost.checked = true
     cbPost.disabled = true
+    if(v.charset === undefined) v.charset = ''
+    tr.appendChild(document.createElement('td')).innerText = v.charset
     let delButton = tr.appendChild(document.createElement('td')).appendChild(document.createElement('input'))
     delButton.setAttribute('class', 'btn')
     delButton.setAttribute('type', 'button')

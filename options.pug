@@ -121,6 +121,7 @@ html
         th Query
         th CurTab
         th POST
+        th Charset
         th Del
     #status
     dialog#detail
@@ -140,6 +141,7 @@ html
           span#option option:
           +labeledcb('checkbox', 'curtab')
           +labeledcb('checkbox', 'post')
+          +labeledinput('text', 'charset')
         div.box
           input.btn#update(type='submit',value='')
           input.btn#cancel(type='reset',value='Cancel')
