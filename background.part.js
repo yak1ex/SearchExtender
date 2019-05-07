@@ -43,7 +43,7 @@
     }
 
     // based on https://stackoverflow.com/a/23687543 with style change and multiple value support
-    function makePostHandler (specUrl) {
+    function makePostHandler (specUrl, charset) {
       let data = {}
       const specUrl2 = (specUrl.indexOf('??') !== -1) ? specUrl.split('??').map(x => x.replace('?', '_')).join('?') : specUrl
       for (let p of new URL(specUrl2).searchParams) {
@@ -59,14 +59,14 @@
         let handler = function (tabId, changeInfo) {
           if (tabId === tab.id && changeInfo.status === 'complete') {
             g.browser.tabs.onUpdated.removeListener(handler)
-            g.browser.tabs.sendMessage(tabId, { url: url, data: data })
+            g.browser.tabs.sendMessage(tabId, { url: url, data: data, charset: charset })
           }
         }
 
         // in case we're faster than page load (usually):
         g.browser.tabs.onUpdated.addListener(handler)
         // just in case we're too late with the listener:
-        g.browser.tabs.sendMessage(tab.id, { url: url, data: data })
+        g.browser.tabs.sendMessage(tab.id, { url: url, data: data, charset: charset })
       }
     }
 
@@ -105,7 +105,7 @@
       })
     }
 
-    function jumpTo (specUrl, disposition, info, isPost) {
+    function jumpTo (specUrl, disposition, info, isPost, charset) {
       return new Promise((resolve, reject) => {
         if (specUrl.indexOf(ARG_CLIP) !== -1) {
           // BUG: permissions.request MUST move to outside of Promise
@@ -124,7 +124,7 @@
       }).then(clip => {
         const url = makeURL(specUrl, info, clip)
         if (isPost) {
-          return setupTab(g.browser.runtime.getURL('poster.html'), disposition).then(makePostHandler(url))
+          return setupTab(g.browser.runtime.getURL('poster.html'), disposition).then(makePostHandler(url, charset))
         } else {
           return setupTab(url, disposition)
         }
@@ -173,7 +173,7 @@
         showOption()
       } else {
         const spec = conf.getFromKey(key)
-        jumpTo(spec.url, spec.curTab ? 'currentTab' : disposition, { selectionText }, spec.isPost)
+        jumpTo(spec.url, spec.curTab ? 'currentTab' : disposition, { selectionText }, spec.isPost, spec.charset)
       }
     })
 
@@ -219,7 +219,7 @@
         )
       } else {
         const spec = conf.getFromName(info.menuItemId)
-        jumpTo(spec.url, spec.curTab ? 'currentTab' : 'newForegroundTab', info, spec.isPost)
+        jumpTo(spec.url, spec.curTab ? 'currentTab' : 'newForegroundTab', info, spec.isPost, spec.charset)
       }
     })
 

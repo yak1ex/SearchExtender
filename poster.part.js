@@ -21,8 +21,8 @@
         form.appendChild(hiddenField)
       }
     }
-    if ('encoding' in message) {
-      form.setAttribute('accept-charset', message.encoding)
+    if ('charset' in message && message.charset !== '') {
+      form.setAttribute('accept-charset', message.charset)
     }
     document.body.appendChild(form)
     form.submit()
