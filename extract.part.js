@@ -3,6 +3,7 @@
     const form = document.activeElement.form
     const name = document.activeElement.name
     const post = form.method === 'post'
+    const charset = post && document.characterSet !== undefined ? document.characterSet : '';
     const queryDelim = (post && form.action.indexOf('?') !== -1) ? '??' : '?'
 
     let query = []
@@ -31,7 +32,8 @@
       '',
       url,
       false,
-      post
+      post,
+      charset
     ]
 
     g.browser.runtime.sendMessage({ command: 'showOptionWithConf', content: content })
