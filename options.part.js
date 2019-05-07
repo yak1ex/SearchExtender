@@ -82,7 +82,7 @@
     elem.key.value = ''
     elem.key.setAttribute('data-current', '')
     elem.query.value = ''
-    elem.curtab.checked = false
+    elem.curtab.checked = true
     elem.post.checked = false
     elem.charset.value = ''
   }

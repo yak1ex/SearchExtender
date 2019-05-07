@@ -31,7 +31,7 @@
       5,
       '',
       url,
-      false,
+      true,
       post,
       charset
     ]
