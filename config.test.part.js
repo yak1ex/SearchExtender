@@ -10,7 +10,8 @@ const defConfExternal = [
     "key": "g",
     "url": "http://www.google.co.jp/search?q=%s",
     "curTab": false,
-    "isPost": false
+    "isPost": false,
+    "charset": ""
   },
   {
     "name": "Wikipedia(JP)",
@@ -21,7 +22,8 @@ const defConfExternal = [
     "key": "wj",
     "url": "https://ja.wikipedia.org/wiki/%s",
     "curTab": false,
-    "isPost": false
+    "isPost": false,
+    "charset": ""
   },
   {
     "name": "Wikipedia(EN)",
@@ -32,7 +34,8 @@ const defConfExternal = [
     "key": "we",
     "url": "https://en.wikipedia.org/wiki/%s",
     "curTab": false,
-    "isPost": false
+    "isPost": false,
+    "charset": ""
   }
 ]
 
@@ -41,19 +44,22 @@ const defConfInternal = [ { name: 'Google',
        key: 'g',
        url: 'http://www.google.co.jp/search?q=%s',
        curTab: false,
-       isPost: false },
+       isPost: false,
+       charset: "" },
      { name: 'Wikipedia(JP)',
        target: 5,
        key: 'wj',
        url: 'https://ja.wikipedia.org/wiki/%s',
        curTab: false,
-       isPost: false },
+       isPost: false,
+       charset: "" },
      { name: 'Wikipedia(EN)',
        target: 5,
        key: 'we',
        url: 'https://en.wikipedia.org/wiki/%s',
        curTab: false,
-       isPost: false } ]
+       isPost: false,
+       charset: "" } ]
 
 describe('Conf', function() {
   const obj = g.Conf.fromStorage(g.Conf.defConfStorage)
