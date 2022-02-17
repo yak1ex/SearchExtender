@@ -8,17 +8,22 @@
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "gulp-insert": "^0.5.0",
-    "gulp-mocha": "^6.0.0",
-    "gulp-pug": "^3.3.0",
+    "gulp-mocha": "^7.0.2",
     "gulp-prettier": "^4.0.0",
+    "gulp-pug": "^5.0.0",
     "gulp-rename": "^1.2.2",
     "merge-stream": "^1.0.1",
-    "mocha": "^6.0.2",
+    "mocha": "^9.2.0",
     "pug": "^3.0.1"
+  },
+  "resolutions": {
+    "chokidar": "3.5.3",
+    "glob-parent": "5.1.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "firefox": "web-ext run -s firefox"
+    "firefox": "web-ext run -s firefox",
+    "preinstall": "npx npm-force-resolutions"
   },
   "repository": {
     "type": "git",
