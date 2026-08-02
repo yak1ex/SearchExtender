@@ -105,23 +105,64 @@
       })
     }
 
-    function jumpTo (specUrl, disposition, info, isPost, charset) {
-      return new Promise((resolve, reject) => {
-        if (specUrl.indexOf(ARG_CLIP) !== -1) {
-          // BUG: permissions.request MUST move to outside of Promise
-          g.browser.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
-            if (granted) {
-              const ta = document.createElement('textarea')
-              document.body.appendChild(ta)
-              ta.focus()
-              document.execCommand('paste')
-              document.body.removeChild(ta)
-              resolve(ta.value)
-            }
-            resolve(undefined)
+    function requestClipboard () {
+      return new Promise((resolve) => {
+        g.browser.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
+          if (!granted) { resolve(undefined); return }
+          if (g.isFirefox) {
+            navigator.clipboard.readText().then(resolve, () => resolve(undefined))
+          } else {
+            readClipboardViaOffscreen().then(resolve, () => resolve(undefined))
+          }
+        })
+      })
+    }
+
+    let creatingOffscreen = null
+    function setupOffscreenDocument () {
+      const url = g.browser.runtime.getURL('offscreen.html')
+      let existingPromise
+      if (g.browser.runtime.getContexts) {
+        existingPromise = g.browser.runtime.getContexts({
+          contextTypes: ['OFFSCREEN_DOCUMENT'],
+          documentUrls: [url]
+        }).then((ctxs) => ctxs.filter(c => c.documentUrl === url))
+      } else {
+        existingPromise = self.clients.matchAll().then((matched) =>
+          matched.filter(c => c.url === url)
+        )
+      }
+      return existingPromise.then((existing) => {
+        if (existing.length > 0) return
+        if (creatingOffscreen) return creatingOffscreen
+        creatingOffscreen = g.browser.offscreen.createDocument({
+          url: 'offscreen.html',
+          reasons: ['CLIPBOARD'],
+          justification: 'Read clipboard text for %c search argument'
+        }).finally(() => { creatingOffscreen = null })
+        return creatingOffscreen
+      })
+    }
+
+    function readClipboardViaOffscreen () {
+      return setupOffscreenDocument().then(() => {
+        return new Promise((resolve) => {
+          g.browser.runtime.sendMessage({ command: 'readClipboard' }, (resp) => {
+            if (g.browser.runtime.lastError || !resp || !resp.ok) { resolve(undefined); return }
+            resolve(resp.text)
           })
-        } else resolve(undefined)
-      }).then(clip => {
+        })
+      })
+    }
+
+    function jumpTo (specUrl, disposition, info, isPost, charset) {
+      let clipPromise
+      if (specUrl.indexOf(ARG_CLIP) !== -1) {
+        clipPromise = requestClipboard()
+      } else {
+        clipPromise = Promise.resolve(undefined)
+      }
+      return clipPromise.then(clip => {
         const url = makeURL(specUrl, info, clip)
         if (isPost) {
           return setupTab(g.browser.runtime.getURL('poster.html'), disposition).then(makePostHandler(url, charset))
@@ -157,11 +198,7 @@
     })
 
     function showOption () {
-      if (g.browser.runtime.openOptionsPage) {
-        g.browser.runtime.openOptionsPage()
-      } else {
-        window.open(g.browser.runtime.getURL('options.html'))
-      }
+      g.browser.runtime.openOptionsPage()
     }
 
     g.browser.omnibox.onInputEntered.addListener((text, disposition) => {
@@ -212,11 +249,10 @@
         showOption()
       } else if (info.menuItemId === EXTRACT_KEY) {
         // Invoked in contextMenu, so active tab assumed
-        // g.browser.tabs.executeScript(tab.id, { frameId: info.frameId, file:'extract.js' })
-        g.browser.tabs.executeScript(
-          { frameId: info.frameId, file: 'extract.js' },
-          () => { if (g.browser.runtime.lastError) console.log('extract.js:' + g.browser.runtime.lastError.message) }
-        )
+        g.browser.scripting.executeScript({
+          target: { tabId: tab.id, frameIds: [info.frameId] },
+          files: ['extract.js']
+        }).catch(err => console.log('extract.js:' + ((err && err.message) ? err.message : err)))
       } else {
         const spec = conf.getFromName(info.menuItemId)
         jumpTo(spec.url, spec.curTab ? 'currentTab' : 'newForegroundTab', info, spec.isPost, spec.charset)

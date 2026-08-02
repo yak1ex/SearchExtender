@@ -1,14 +1,16 @@
 (function (g) {
   /* global browser chrome */
-  if (!('browser' in window) || browser.isChrome === undefined) {
+  if (typeof browser === 'undefined' || browser.isChrome === undefined) {
     const CHROME = 1
     const EDGE = 2
     const FIREFOX = 3
-    const ua = (('browser' in window) ? 2 : 0) + (('chrome' in window) ? 1 : 0)
-    if (!('browser' in window)) {
+    const hasBrowser = typeof browser !== 'undefined'
+    const hasChrome = typeof chrome !== 'undefined'
+    const ua = (hasBrowser ? 2 : 0) + (hasChrome ? 1 : 0)
+    if (!hasBrowser) {
       g.browser = chrome
     } else {
-      g.browser = window.browser
+      g.browser = browser
     }
     g.isChrome = ua === CHROME
     g.isEdge = ua === EDGE

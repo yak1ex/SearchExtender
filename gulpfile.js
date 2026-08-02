@@ -23,6 +23,7 @@ function process (type) {
   src.push(concatjs(['multiua.part.js', 'extract.part.js'], 'extract.js'))
   src.push(concatjs(['multiua.part.js', 'config.part.js', 'options.part.js'], 'options.js'))
   src.push(concatjs(['multiua.part.js', 'poster.part.js'], 'poster.js'))
+  src.push(concatjs(['multiua.part.js', 'offscreen.part.js'], 'offscreen.js'))
   src.push(gulp.src('*.pug').pipe(pug({ locals: { [type]: true } })))
   if (type === 'firefox') {
     src.push(gulp.src('node_modules/dialog-polyfill/dialog-polyfill.*').pipe(rename({ dirname: '' })))

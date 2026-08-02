@@ -1,6 +1,6 @@
 {
   "name": "search_extender",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Search extender for omnibox and context menu",
   "main": "gulpfile.js",
   "devDependencies": {
