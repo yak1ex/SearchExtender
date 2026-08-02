@@ -121,10 +121,18 @@
     let creatingOffscreen = null
     function setupOffscreenDocument () {
       const url = g.browser.runtime.getURL('offscreen.html')
-      return g.browser.runtime.getContexts({
-        contextTypes: ['OFFSCREEN_DOCUMENT'],
-        documentUrls: [url]
-      }).then((existing) => {
+      let existingPromise
+      if (g.browser.runtime.getContexts) {
+        existingPromise = g.browser.runtime.getContexts({
+          contextTypes: ['OFFSCREEN_DOCUMENT'],
+          documentUrls: [url]
+        }).then((ctxs) => ctxs.filter(c => c.documentUrl === url))
+      } else {
+        existingPromise = self.clients.matchAll().then((matched) =>
+          matched.filter(c => c.url === url)
+        )
+      }
+      return existingPromise.then((existing) => {
         if (existing.length > 0) return
         if (creatingOffscreen) return creatingOffscreen
         creatingOffscreen = g.browser.offscreen.createDocument({
