@@ -109,7 +109,40 @@
       return new Promise((resolve) => {
         g.browser.permissions.request({ permissions: ['clipboardRead'] }, (granted) => {
           if (!granted) { resolve(undefined); return }
-          navigator.clipboard.readText().then(resolve, () => resolve(undefined))
+          if (g.isFirefox) {
+            navigator.clipboard.readText().then(resolve, () => resolve(undefined))
+          } else {
+            readClipboardViaOffscreen().then(resolve, () => resolve(undefined))
+          }
+        })
+      })
+    }
+
+    let creatingOffscreen = null
+    function setupOffscreenDocument () {
+      const url = g.browser.runtime.getURL('offscreen.html')
+      return g.browser.runtime.getContexts({
+        contextTypes: ['OFFSCREEN_DOCUMENT'],
+        documentUrls: [url]
+      }).then((existing) => {
+        if (existing.length > 0) return
+        if (creatingOffscreen) return creatingOffscreen
+        creatingOffscreen = g.browser.offscreen.createDocument({
+          url: 'offscreen.html',
+          reasons: ['CLIPBOARD'],
+          justification: 'Read clipboard text for %c search argument'
+        }).finally(() => { creatingOffscreen = null })
+        return creatingOffscreen
+      })
+    }
+
+    function readClipboardViaOffscreen () {
+      return setupOffscreenDocument().then(() => {
+        return new Promise((resolve) => {
+          g.browser.runtime.sendMessage({ command: 'readClipboard' }, (resp) => {
+            if (g.browser.runtime.lastError || !resp || !resp.ok) { resolve(undefined); return }
+            resolve(resp.text)
+          })
         })
       })
     }

@@ -13,6 +13,6 @@
   "options_ui": {
     "page": "options.html"
   },
-  "permissions": [ "contextMenus", "storage", "activeTab", "scripting" ],
+  "permissions": [ "contextMenus", "storage", "activeTab", "scripting", "offscreen" ],
   "optional_permissions": [ "clipboardRead" ]
 }
