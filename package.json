@@ -5,21 +5,24 @@
   "main": "gulpfile.js",
   "devDependencies": {
     "chai": "^4.2.0",
-    "gulp": "^4.0.2",
+    "gulp": "^5.0.1",
     "gulp-concat": "^2.6.1",
     "gulp-insert": "^0.5.0",
-    "gulp-mocha": "^8.0.0",
+    "gulp-mocha": "^7.0.2",
     "gulp-prettier": "^4.0.0",
     "gulp-pug": "^5.0.0",
     "gulp-rename": "^1.2.2",
     "merge-stream": "^1.0.1",
-    "mocha": "^10.0.0",
+    "mocha": "^11.8.0",
     "pug": "^3.0.1"
   },
   "resolutions": {
     "chokidar": "3.5.3",
     "glob-parent": "5.1.2",
-    "glob-stream": "7.0.0"
+    "glob-stream": "7.0.0",
+    "js-yaml": "3.15.1",
+    "minimatch": "3.1.5",
+    "serialize-javascript": "7.0.7"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
