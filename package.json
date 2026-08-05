@@ -16,7 +16,7 @@
     "mocha": "^11.8.0",
     "pug": "^3.0.1"
   },
-  "resolutions": {
+  "overrides": {
     "chokidar": "3.5.3",
     "glob-parent": "5.1.2",
     "glob-stream": "7.0.0",
@@ -26,8 +26,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "firefox": "web-ext run -s firefox",
-    "preinstall": "npx npm-force-resolutions"
+    "firefox": "web-ext run -s firefox"
   },
   "repository": {
     "type": "git",
